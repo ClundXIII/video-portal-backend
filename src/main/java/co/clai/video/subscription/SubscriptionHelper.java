@@ -1,0 +1,93 @@
+package co.clai.video.subscription;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import co.clai.video.db.DatabaseConnector;
+import co.clai.video.db.model.ExternalSubscription;
+import co.clai.video.db.model.InternalSubscription;
+import co.clai.video.db.model.User;
+import co.clai.video.db.model.Video;
+import co.clai.video.html.HtmlGenericDiv;
+import co.clai.video.html.HtmlStyleConstants;
+import co.clai.video.platform.PlatformVideo;
+
+public class SubscriptionHelper {
+
+	private final DatabaseConnector dbCon;
+
+	public SubscriptionHelper(DatabaseConnector dbCon) {
+		this.dbCon = dbCon;
+	}
+
+	public List<HtmlGenericDiv> renderOrderedNewestVideosList() {
+
+		List<Video> videos = Video.getLatestVideos(dbCon, 30);
+
+		List<HtmlGenericDiv> retList = new ArrayList<>();
+
+		for (Video v : videos) {
+			retList.add(new PlatformVideo(v).renderPreview(dbCon));
+		}
+
+		return retList;
+	}
+
+	public List<HtmlGenericDiv> renderOrderedSubscribedVideosList(User thisUser) {
+
+		Map<String, HtmlGenericDiv> subMap = new HashMap<>();
+
+		for (InternalSubscription intSub : InternalSubscription.getInternalSubscriptionByUserId(dbCon,
+				thisUser.getId())) {
+			List<Video> videos = Video.getLatestVideosByChannelId(dbCon, intSub.getChannelId(), 30);
+
+			for (Video v : videos) {
+
+				PlatformVideo platVid = new PlatformVideo(v);
+
+				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), platVid.renderPreview(dbCon));
+			}
+		}
+
+		for (ExternalSubscription exSub : ExternalSubscription.getExternalSubscriptionByUserId(dbCon,
+				thisUser.getId())) {
+
+			List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, exSub.getPlatformId(),
+					exSub.getChannelIdentifier());
+
+			for (PlatformVideo v : videos) {
+				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
+			}
+		}
+
+		LinkedList<HtmlGenericDiv> retList = new LinkedList<>();
+
+		SortedSet<String> keys = new TreeSet<>(subMap.keySet());
+
+		for (String key : keys) {
+			retList.addFirst(subMap.get(key));
+		}
+
+		return retList;
+	}
+
+	public List<HtmlGenericDiv> renderLiveStreams(User thisUser) {
+		// TODO Auto-generated method stub
+
+		List<HtmlGenericDiv> retList = new ArrayList<>();
+
+		for (int i = 0; i < 7; i++) {
+			HtmlGenericDiv div = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_PREVIEW);
+			div.writeText("Livestream #" + i);
+			retList.add(div);
+		}
+
+		return retList;
+	}
+
+}
