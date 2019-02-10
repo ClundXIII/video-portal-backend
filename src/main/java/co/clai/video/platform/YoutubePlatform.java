@@ -130,9 +130,10 @@ public class YoutubePlatform extends AbstractPlatform {
 		boolean forceNewTab = false;
 		String title = videoData.getString("title");
 		String description = videoData.getString("description");
+		String channelIdentifier = videoData.getString("channelId");
 		int platformId = platform.getId();
 
-		PlatformVideo platVid = new PlatformVideo(-1, -1, -1, platformId, date, thumpnailLink, identifier, forceNewTab,
+		PlatformVideo platVid = new PlatformVideo(-1, -1, -1, platformId, date, thumpnailLink, identifier, channelIdentifier, forceNewTab,
 				title, description, HtmlStyleConstants.DIV_CLASS_VIDEO_YOUTUBE_THUMBNAIL);
 		return platVid;
 	}

@@ -31,30 +31,31 @@ public class PlatformVideo {
 	private final Date date;
 	private final String thumbnailLink;
 	private final String videoIdentifier;
+	private final String channelIdentifier;
 	private final boolean forceNewTab;
 	private final String title;
 	private final String description;
 	private final String additionalCssClasses;
 
-	public PlatformVideo(int platformId, Date date, String thumbnailLink, String videoIdentifier, boolean forceNewTab,
+	public PlatformVideo(int platformId, Date date, String thumbnailLink, String videoIdentifier, String channelIdentifier, boolean forceNewTab,
 			String title, String description) {
-		this(-1, -1, -1, platformId, date, thumbnailLink, videoIdentifier, forceNewTab, title, description);
+		this(-1, -1, -1, platformId, date, thumbnailLink, videoIdentifier, channelIdentifier, forceNewTab, title, description);
 	}
 
 	public PlatformVideo(Video video) {
 		this(video.getId(), video.getOwnerId(), video.getChannelId(), video.getPlatformId(), video.getDate(),
-				video.getThumbnail(), video.getPlatformIdentifier(), video.isAllowEmbed(), video.getName(),
+				video.getThumbnail(), video.getPlatformIdentifier(), video.getChannelIdentifier(), video.isAllowEmbed(), video.getName(),
 				video.getDescription());
 	}
 
 	public PlatformVideo(int videoId, int userId, int channelId, int platformId, Date date, String thumbnailLink,
-			String videoIdentifier, boolean forceNewTab, String title, String description) {
-		this(videoId, userId, channelId, platformId, date, thumbnailLink, videoIdentifier, forceNewTab, title,
+			String videoIdentifier, String channelIdentifier, boolean forceNewTab, String title, String description) {
+		this(videoId, userId, channelId, platformId, date, thumbnailLink, videoIdentifier, channelIdentifier, forceNewTab, title,
 				description, "");
 	}
 
 	public PlatformVideo(int videoId, int userId, int channelId, int platformId, Date date, String thumbnailLink,
-			String videoIdentifier, boolean forceNewTab, String title, String description,
+			String videoIdentifier, String channelIdentifier, boolean forceNewTab, String title, String description,
 			String additionalCssClasses) {
 		this.userId = userId;
 		this.videoId = videoId;
@@ -67,6 +68,7 @@ public class PlatformVideo {
 		this.title = title;
 		this.description = description;
 		this.additionalCssClasses = additionalCssClasses;
+		this.channelIdentifier = channelIdentifier;
 	}
 
 	public String getDescription() {
@@ -103,6 +105,10 @@ public class PlatformVideo {
 
 	public String getVideoIdentifier() {
 		return videoIdentifier;
+	}
+
+	public String getChannelIdentifier() {
+		return channelIdentifier;
 	}
 
 	public boolean isForceNewTab() {
@@ -194,6 +200,12 @@ public class PlatformVideo {
 			String channelIdentifier) {
 
 		Platform p = Platform.getPlatformById(dbCon, platformId);
+
+		return getLatestVideos(dbCon, p, channelIdentifier);
+	}
+
+	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, Platform p,
+			String channelIdentifier) {
 
 		AbstractPlatform ap = AbstractPlatform.getPlatformFromConfig(p);
 

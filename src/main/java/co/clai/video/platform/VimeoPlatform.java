@@ -146,7 +146,7 @@ public class VimeoPlatform extends AbstractPlatform {
 				logger.log(Level.INFO, "no description: " + e.getMessage());
 			}
 
-			retList.add(new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, forceNewTab,
+			retList.add(new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier, forceNewTab,
 					rawVidData.getString("name"), description));
 		}
 
@@ -179,13 +179,15 @@ public class VimeoPlatform extends AbstractPlatform {
 
 		String description = "";
 
+		String channelIdentifier = rawVidData.getJSONObject("user").getString("uri").replace("/users/", "");
+
 		try {
 			description = rawVidData.getString("description");
 		} catch (Exception e) {
 			logger.log(Level.INFO, "no description: " + e.getMessage());
 		}
 
-		return new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, forceNewTab,
+		return new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier, forceNewTab,
 				rawVidData.getString("name"), description);
 	}
 

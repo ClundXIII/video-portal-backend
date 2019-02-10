@@ -79,8 +79,13 @@ public class Index extends AbstractModule {
 						newVidsDiv.writeText(" to manage your Subscriptions.");
 					} else {
 
+						int videoDisplayCount = 0;
 						for (Builder video : newVideos) {
+							if (videoDisplayCount > 30) {
+								break;
+							}
 							newVidsDiv.write(video);
+							videoDisplayCount++;
 						}
 					}
 				}
@@ -110,8 +115,13 @@ public class Index extends AbstractModule {
 			if (newVideos == null) {
 				newVidsDiv.writeText("error loading recent videos");
 			} else {
+				int videoDisplayCount = 0;
 				for (Builder video : newVideos) {
+					if (videoDisplayCount>10) {
+						break;
+					}
 					newVidsDiv.write(video);
+					videoDisplayCount++;
 				}
 			}
 

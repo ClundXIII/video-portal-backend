@@ -1,12 +1,16 @@
 package co.clai.video.module;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 import co.clai.video.UserSession;
 import co.clai.video.db.DatabaseConnector;
+import co.clai.video.db.model.Platform;
 import co.clai.video.html.HtmlPage;
+import co.clai.video.platform.AbstractPlatform;
+import co.clai.video.platform.PlatformVideo;
 
 public class ViewChannel extends AbstractModule {
 
@@ -19,11 +23,31 @@ public class ViewChannel extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage p = new HtmlPage("CLAI Video Portal", null, null, s);
+		String channelName = "";
 
-		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
+		if (!parameters.containsKey("id")) {
+			HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
+			p.writeLink("index", "main page");
+			return p.finish().getBytes();
+		}
 
-		p.writeText("recent uploads here");
+		String id = parameters.get("id")[0];
+
+		Platform plat = Platform.getPlatformByKey(dbCon, id.substring(0, id.indexOf("_")));
+
+		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+
+		String channelIdentifier = id.substring(id.indexOf("_") + 1);
+
+		channelName = abPlat.getChannelName(channelIdentifier);
+
+		HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
+
+		List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+
+		for (PlatformVideo v : videos) {
+			p.write(v.renderPreview(dbCon));
+		}
 
 		return p.finish().getBytes();
 	}

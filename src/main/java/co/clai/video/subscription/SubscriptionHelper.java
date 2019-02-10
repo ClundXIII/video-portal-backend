@@ -2,9 +2,11 @@ package co.clai.video.subscription;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -62,6 +64,13 @@ public class SubscriptionHelper {
 
 			for (PlatformVideo v : videos) {
 				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
+
+				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
+				if (dbVideo == null) {
+					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
+							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
+							v.getThumbnailLink(), true);
+				}
 			}
 		}
 
@@ -85,6 +94,46 @@ public class SubscriptionHelper {
 			HtmlGenericDiv div = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_PREVIEW);
 			div.writeText("Livestream #" + i);
 			retList.add(div);
+		}
+
+		return retList;
+	}
+
+	public List<HtmlGenericDiv> renderSuggestedVideos(PlatformVideo vid, int count) {
+
+		List<HtmlGenericDiv> retList = new ArrayList<>();
+
+		List<Video> latestChannelVideos = Video.getLatestVideosByPlatformChannelIdentifier(dbCon, vid.getPlatformId(),
+				vid.getChannelIdentifier(), count * 10);
+
+		Set<String> videoIdentifier = new HashSet<>();
+
+		while ((retList.size() < (count / 2) ) && (latestChannelVideos.size() > 0)) {
+			int randomVideoPosition = (int) Math.random() * latestChannelVideos.size();
+
+			final PlatformVideo platformVideo = new PlatformVideo(latestChannelVideos.remove(randomVideoPosition));
+
+			videoIdentifier.add(platformVideo.getVideoIdentifier());
+
+			retList.add(platformVideo.renderPreview(dbCon));
+		}
+
+		List<Video> latestVideos = Video.getLatestVideos(dbCon, count * 10);
+
+		while ((retList.size() < count) && (latestVideos.size() > 0)) {
+			int randomVideoPosition = (int) Math.random() * latestVideos.size();
+
+			final PlatformVideo platformVideo = new PlatformVideo(latestVideos.remove(randomVideoPosition));
+
+			if (videoIdentifier.contains(platformVideo.getVideoIdentifier())) {
+				continue;
+			}
+
+			if (platformVideo.getChannelIdentifier() == vid.getChannelIdentifier()) {
+				continue;
+			}
+
+			retList.add(platformVideo.renderPreview(dbCon));
 		}
 
 		return retList;

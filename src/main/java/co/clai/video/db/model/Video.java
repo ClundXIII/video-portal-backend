@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import co.clai.video.db.DatabaseConnector;
 import co.clai.video.db.DbValue;
 import co.clai.video.db.DbValueType;
+import co.clai.video.platform.PlatformVideo;
 import co.clai.video.util.cache.Cache;
 import co.clai.video.util.cache.PermanentCache;
 import co.clai.video.util.log.LoggingUtil;
@@ -23,6 +24,7 @@ public class Video extends AbstractDbTable {
 	public static final String DB_TABLE_NAME = "video";
 	public static final String DB_TABLE_COLUMN_NAME_OWNER_ID = "owner_id";
 	public static final String DB_TABLE_COLUMN_NAME_CHANNEL_ID = "channel_id";
+	public static final String DB_TABLE_COLUMN_NAME_CHANNEL_IDENTIFIER = "channel_identifier";
 	public static final String DB_TABLE_COLUMN_NAME_NAME = "name";
 	public static final String DB_TABLE_COLUMN_NAME_PLATFORM_ID = "platform_id";
 	public static final String DB_TABLE_COLUMN_NAME_PLATFORM_IDENTIFIER = "platform_identifier";
@@ -39,6 +41,7 @@ public class Video extends AbstractDbTable {
 		columnMap.put(DB_TABLE_COLUMN_NAME_ID, DbValueType.INTEGER);
 		columnMap.put(DB_TABLE_COLUMN_NAME_OWNER_ID, DbValueType.INTEGER);
 		columnMap.put(DB_TABLE_COLUMN_NAME_CHANNEL_ID, DbValueType.INTEGER);
+		columnMap.put(DB_TABLE_COLUMN_NAME_CHANNEL_IDENTIFIER, DbValueType.STRING);
 		columnMap.put(DB_TABLE_COLUMN_NAME_NAME, DbValueType.STRING);
 		columnMap.put(DB_TABLE_COLUMN_NAME_PLATFORM_ID, DbValueType.INTEGER);
 		columnMap.put(DB_TABLE_COLUMN_NAME_PLATFORM_IDENTIFIER, DbValueType.STRING);
@@ -51,6 +54,7 @@ public class Video extends AbstractDbTable {
 	private final int id;
 	private final int ownerId;
 	private final int channelId;
+	private final String channelIdentifier;
 	private final String name;
 	private final int platformId;
 	private final String platformIdentifier;
@@ -62,16 +66,17 @@ public class Video extends AbstractDbTable {
 	public static Video dummyVideo = new Video();
 
 	public Video() {
-		this(-1, -1, -1, null, -1, null, null, null, null, false);
+		this(-1, -1, -1, null, null, -1, null, null, null, null, false);
 	}
 
-	public Video(int id, int ownerId, int channelId, String name, int platformId, String platformIdentifier,
+	public Video(int id, int ownerId, int channelId, String channelIdentifier, String name, int platformId, String platformIdentifier,
 			String date, String description, String thumbnail, boolean allowEmbed) {
 		super(DB_TABLE_NAME, columnMap);
 
 		this.id = id;
 		this.ownerId = ownerId;
 		this.channelId = channelId;
+		this.channelIdentifier = channelIdentifier;
 		this.name = name;
 		this.platformId = platformId;
 		this.platformIdentifier = platformIdentifier;
@@ -89,7 +94,7 @@ public class Video extends AbstractDbTable {
 		this.allowEmbed = allowEmbed;
 	}
 
-	public static void addNewVideo(DatabaseConnector dbCon, int ownerId, int channelId, String name, int platformId,
+	public static void addNewVideo(DatabaseConnector dbCon, int ownerId, int channelId, String channelIdentifier, String name, int platformId,
 			String platformIdentifier, String date, String description, String thumbnail, boolean allowEmbed) {
 
 		List<Map<String, DbValue>> test = dbCon.select(DB_TABLE_NAME,
@@ -103,11 +108,11 @@ public class Video extends AbstractDbTable {
 		}
 
 		dbCon.insert(DB_TABLE_NAME,
-				Arrays.asList(DB_TABLE_COLUMN_NAME_OWNER_ID, DB_TABLE_COLUMN_NAME_CHANNEL_ID, DB_TABLE_COLUMN_NAME_NAME,
+				Arrays.asList(DB_TABLE_COLUMN_NAME_OWNER_ID, DB_TABLE_COLUMN_NAME_CHANNEL_ID, DB_TABLE_COLUMN_NAME_CHANNEL_IDENTIFIER, DB_TABLE_COLUMN_NAME_NAME,
 						DB_TABLE_COLUMN_NAME_PLATFORM_ID, DB_TABLE_COLUMN_NAME_PLATFORM_IDENTIFIER,
 						DB_TABLE_COLUMN_NAME_DATE, DB_TABLE_COLUMN_NAME_DESCRIPTION, DB_TABLE_COLUMN_NAME_THUMBNAIL,
 						DB_TABLE_COLUMN_NAME_ALLOW_EMBED),
-				Arrays.asList(new DbValue(ownerId), new DbValue(channelId), new DbValue(name), new DbValue(platformId),
+				Arrays.asList(new DbValue(ownerId), new DbValue(channelId), new DbValue(channelIdentifier), new DbValue(name), new DbValue(platformId),
 						new DbValue(platformIdentifier), new DbValue(date), new DbValue(description),
 						new DbValue(thumbnail), DbValue.newBooleanAsInteger(allowEmbed)));
 
@@ -123,6 +128,7 @@ public class Video extends AbstractDbTable {
 		int id = result.get(DB_TABLE_COLUMN_NAME_ID).getInt();
 		int ownerId = result.get(DB_TABLE_COLUMN_NAME_OWNER_ID).getInt();
 		int channelId = result.get(DB_TABLE_COLUMN_NAME_CHANNEL_ID).getInt();
+		String channelIdentifier = result.get(DB_TABLE_COLUMN_NAME_CHANNEL_IDENTIFIER).getString();
 		String name = result.get(DB_TABLE_COLUMN_NAME_NAME).getString();
 		int platformId = result.get(DB_TABLE_COLUMN_NAME_PLATFORM_ID).getInt();
 		String patformIdentifier = result.get(DB_TABLE_COLUMN_NAME_PLATFORM_IDENTIFIER).getString();
@@ -131,7 +137,7 @@ public class Video extends AbstractDbTable {
 		String thumbnail = result.get(DB_TABLE_COLUMN_NAME_THUMBNAIL).getString();
 		boolean allowEmbed = result.get(DB_TABLE_COLUMN_NAME_ALLOW_EMBED).getIntegerAsBool();
 
-		return new Video(id, ownerId, channelId, name, platformId, patformIdentifier, date, description, thumbnail,
+		return new Video(id, ownerId, channelId, channelIdentifier, name, platformId, patformIdentifier, date, description, thumbnail,
 				allowEmbed);
 	}
 
@@ -160,6 +166,10 @@ public class Video extends AbstractDbTable {
 		return channelId;
 	}
 
+	public String getChannelIdentifier() {
+		return channelIdentifier;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -182,6 +192,21 @@ public class Video extends AbstractDbTable {
 
 		List<Map<String, DbValue>> results = dbCon.select(DB_TABLE_NAME, DB_TABLE_COLUMN_NAME_CHANNEL_ID,
 				new DbValue(channelId), dummyVideo.getColumns(),
+				" ORDER BY " + DB_TABLE_COLUMN_NAME_DATE + " DESC LIMIT " + count);
+
+		for (Map<String, DbValue> r : results) {
+			retVideo.add(getVideoFromDbResult(r));
+		}
+
+		return retVideo;
+	}
+
+	public static List<Video> getLatestVideosByPlatformChannelIdentifier(DatabaseConnector dbCon,
+			int platformId, String channelIdentifier, int count) {
+		List<Video> retVideo = new ArrayList<>();
+
+		List<Map<String, DbValue>> results = dbCon.select(DB_TABLE_NAME, Arrays.asList(DB_TABLE_COLUMN_NAME_PLATFORM_ID, DB_TABLE_COLUMN_NAME_CHANNEL_IDENTIFIER),
+				Arrays.asList(new DbValue(platformId), new DbValue(channelIdentifier) ), dummyVideo.getColumns(),
 				" ORDER BY " + DB_TABLE_COLUMN_NAME_DATE + " DESC LIMIT " + count);
 
 		for (Map<String, DbValue> r : results) {
