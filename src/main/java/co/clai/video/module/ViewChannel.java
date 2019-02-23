@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import co.clai.video.UserSession;
 import co.clai.video.db.DatabaseConnector;
 import co.clai.video.db.model.Platform;
+import co.clai.video.html.HtmlGenericDiv;
 import co.clai.video.html.HtmlPage;
 import co.clai.video.platform.AbstractPlatform;
 import co.clai.video.platform.PlatformVideo;
@@ -43,11 +44,21 @@ public class ViewChannel extends AbstractModule {
 
 		HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
 
+		HtmlGenericDiv div = new HtmlGenericDiv();
+
+		div.writeLink(abPlat.getOriginalChannelLink(channelIdentifier), "click here to view the channel \"" + channelName + "\" on " + plat.getName(), true);
+
+		div.newLine();
+
 		List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
 
 		for (PlatformVideo v : videos) {
-			p.write(v.renderPreview(dbCon));
+			div.write(v.renderPreview(dbCon));
 		}
+
+		div.newLine();
+
+		p.write(div);
 
 		return p.finish().getBytes();
 	}

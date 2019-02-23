@@ -40,17 +40,16 @@ public class WatchVideo extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage p = new HtmlPage("CLAI Video Portal", null, null, s);
-
-		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
-
-		HtmlResponsiveColumns cols = new HtmlResponsiveColumns();
-
-		PlatformVideo vid = null;
-
-		cols.startColumn(10);
 		try {
-			vid = PlatformVideo.getVideo(dbCon, parameters.get(GET_PARAM_PLATFORM_VIDEO_KEY)[0]);
+			PlatformVideo vid = PlatformVideo.getVideo(dbCon, parameters.get(GET_PARAM_PLATFORM_VIDEO_KEY)[0]);
+
+			HtmlPage p = new HtmlPage(vid.getTitle() + " - Video Portal", null, null, s);
+
+			p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
+
+			HtmlResponsiveColumns cols = new HtmlResponsiveColumns();
+
+			cols.startColumn(10);
 
 			cols.writeH3(vid.getTitle());
 
@@ -73,28 +72,31 @@ public class WatchVideo extends AbstractModule {
 			cols.writeHline();
 			cols.writeText(vid.getDescription());
 
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Error while trying to load video div: " + e.getMessage());
-			e.printStackTrace();
-			cols.writeText("video could not be loaded");
-		}
+			cols.startColumn(2);
 
-		cols.startColumn(2);
+			cols.writeText("recommended videos");
 
-		cols.writeText("recommended videos");
-
-		if (vid != null) {
 			List<HtmlGenericDiv> videoSuggestions = subscriptionHelper.renderSuggestedVideos(vid, 8);
 			for (int i = 0; i < videoSuggestions.size(); i++) {
 				int toRemove = (int) (Math.random() * videoSuggestions.size());
 
 				cols.write(videoSuggestions.remove(toRemove));
 			}
+
+			p.write(cols);
+
+			return p.finish().getBytes();
+
+		} catch (Exception e) {
+			HtmlPage p = new HtmlPage("Video Portal", null, null, s);
+
+			logger.log(Level.WARNING, "Error while trying to load video div: " + e.getMessage());
+			e.printStackTrace();
+			p.writeText("video could not be loaded");
+
+			return p.finish().getBytes();
 		}
 
-		p.write(cols);
-
-		return p.finish().getBytes();
 	}
 
 	@Override

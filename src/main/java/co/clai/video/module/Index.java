@@ -31,7 +31,7 @@ public class Index extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage p = new HtmlPage("CLAI Video Portal", null, null, s);
+		HtmlPage p = new HtmlPage("Video Portal", null, null, s);
 
 		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 
