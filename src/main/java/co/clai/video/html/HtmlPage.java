@@ -202,6 +202,10 @@ public class HtmlPage implements Builder {
 		write("<hr>");
 	}
 
+	public void newLine() {
+		write("<br>");
+	}
+
 	public void writePre(String string) {
 		write("<pre>" + escapeForHtml(string) + "</pre>");
 	}

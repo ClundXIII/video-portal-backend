@@ -39,7 +39,12 @@ public class Index extends AbstractModule {
 
 		User thisUser = s.getThisUser();
 		if (thisUser == null) {
-			p.writeLink(Profile.LOCATION, "Log in to see your subscriptions");
+			p.writeLink(Profile.LOCATION, "Log in");
+			p.writeText(" to see your subscriptions");
+			p.newLine();
+			p.writeText("Or use the URL based ");
+			p.writeLink(LinkOnlySubscription.LOCATION, "subscription box");
+			p.writeText(".");
 		} else {
 			cols.startColumn(8);
 			cols.writeH1("Livestreams");
