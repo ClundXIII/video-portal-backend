@@ -12,6 +12,7 @@ import co.clai.video.db.model.Video;
 import co.clai.video.html.HtmlGenericDiv;
 import co.clai.video.html.HtmlImg;
 import co.clai.video.html.HtmlStyleConstants;
+import co.clai.video.module.ViewChannel;
 import co.clai.video.module.WatchVideo;
 import co.clai.video.util.cache.Cache;
 import co.clai.video.util.cache.PermanentCache;
@@ -272,6 +273,14 @@ public class PlatformVideo {
 		HtmlGenericDiv titleDiv = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_THUMBNAIL_TITLE);
 		titleDiv.writeText(title);
 		div.write(titleDiv);
+
+		HtmlGenericDiv channelDiv = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_CHANNEL_LINK);
+
+		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(p);
+
+		channelDiv.writeLink(ViewChannel.LOCATION + "?" + ViewChannel.GET_PARAM_CHANNEL_ID + "=" + p.getKey() + "_" + channelIdentifier, abPlat.getChannelName(channelIdentifier));
+		div.write(channelDiv);
+
 		return div;
 	}
 

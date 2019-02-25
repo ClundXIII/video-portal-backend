@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import co.clai.video.db.DatabaseConnector;
 import co.clai.video.db.model.ExternalSubscription;
 import co.clai.video.db.model.InternalSubscription;
+import co.clai.video.db.model.Platform;
 import co.clai.video.db.model.User;
 import co.clai.video.db.model.Video;
 import co.clai.video.html.HtmlGenericDiv;
@@ -35,6 +36,42 @@ public class SubscriptionHelper {
 
 		for (Video v : videos) {
 			retList.add(new PlatformVideo(v).renderPreview(dbCon));
+		}
+
+		return retList;
+	}
+
+	public List<HtmlGenericDiv> renderOrderedSubscribedVideosFromList(List<String> channelKeys) {
+
+		Map<String, HtmlGenericDiv> subMap = new HashMap<>();
+
+		for (String channelKey : channelKeys) {
+
+			String platformKey = channelKey.substring(0, channelKey.indexOf("_"));
+			String channelIdentifier = channelKey.substring(channelKey.indexOf("_") + 1);
+
+			Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+
+			List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+
+			for (PlatformVideo v : videos) {
+				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
+
+				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
+				if (dbVideo == null) {
+					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
+							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
+							v.getThumbnailLink(), true);
+				}
+			}
+		}
+
+		LinkedList<HtmlGenericDiv> retList = new LinkedList<>();
+
+		SortedSet<String> keys = new TreeSet<>(subMap.keySet());
+
+		for (String key : keys) {
+			retList.addFirst(subMap.get(key));
 		}
 
 		return retList;
@@ -108,7 +145,7 @@ public class SubscriptionHelper {
 
 		Set<String> videoIdentifier = new HashSet<>();
 
-		while ((retList.size() < (count / 2) ) && (latestChannelVideos.size() > 0)) {
+		while ((retList.size() < (count / 2)) && (latestChannelVideos.size() > 0)) {
 			int randomVideoPosition = (int) Math.random() * latestChannelVideos.size();
 
 			final PlatformVideo platformVideo = new PlatformVideo(latestChannelVideos.remove(randomVideoPosition));

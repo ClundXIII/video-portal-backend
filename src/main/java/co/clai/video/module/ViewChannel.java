@@ -15,6 +15,7 @@ import co.clai.video.platform.PlatformVideo;
 
 public class ViewChannel extends AbstractModule {
 
+	public static final String GET_PARAM_CHANNEL_ID = "id";
 	public static final String LOCATION = "c";
 
 	public ViewChannel(DatabaseConnector dbCon) {
@@ -26,13 +27,13 @@ public class ViewChannel extends AbstractModule {
 
 		String channelName = "";
 
-		if (!parameters.containsKey("id")) {
+		if (!parameters.containsKey(GET_PARAM_CHANNEL_ID)) {
 			HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
 			p.writeLink("index", "main page");
 			return p.finish().getBytes();
 		}
 
-		String id = parameters.get("id")[0];
+		String id = parameters.get(GET_PARAM_CHANNEL_ID)[0];
 
 		Platform plat = Platform.getPlatformByKey(dbCon, id.substring(0, id.indexOf("_")));
 

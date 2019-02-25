@@ -11,13 +11,13 @@ body {
 }
 
 .content {
-	margin-top: 30px;
+    margin-top: 30px;
 }
 
 #function_return_message {
-	border: 1px;
-	border-radius: 4px;
-	
+    border: 1px;
+    border-radius: 4px;
+
     -moz-animation: cssAnimation 7s forwards;
     /* Firefox */
     -webkit-animation: cssAnimation 7s forwards;
@@ -70,41 +70,48 @@ display:none;}
 .panel h1, .panel h2, .panel h3 { margin-top:0;}
 
 #new_vids_container {
-	overflow:auto;
+    overflow:auto;
 }
 
 .video_preview {
-	height:155px;
-	width: 210px;
-	float: left;
-	margin: 7px;
-	overflow: hidden;
+    height:155px;
+    width: 210px;
+    float: left;
+    margin: 7px;
+    overflow: hidden;
 }
 
 #info_text {
-	max-width: 720px;
-	margin:0 auto;
+    max-width: 720px;
+    margin:0 auto;
 }
 
 .thumbnail {
-	top: 0;
-	width: 100%;
-	height: 118px;
+    top: 0;
+    width: 100%;
+    height: 118px;
 }
 
 .thumbnail-video-title {
-	bottom: 0;
-	width: 100%;
-	height: 22px;
+    bottom: 0;
+    width: 100%;
+    height: 22px;
+    font-size: 75%;
+    line-height: 110%;
+}
+
+.thumbnail-channel-link {
+    text-align: right;
+    margin-top: -5px;
 }
 
 div.video_preview a {
-	overflow: hidden;
-	height: 118px;
+    overflow: hidden;
+    height: 118px;
 }
 
 div.video_preview a img.yt-thumbnail {
-	margin-top:-15px;
+    margin-top:-15px;
 }
 
 /*.dropdown-toggle:focus + .dropdown-menu { display: block; }*/ 

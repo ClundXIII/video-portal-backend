@@ -7,6 +7,7 @@ import co.clai.video.db.model.User;
 import co.clai.video.module.Api;
 import co.clai.video.module.EditPlatform;
 import co.clai.video.module.Index;
+import co.clai.video.module.LinkOnlySubscription;
 import co.clai.video.module.Profile;
 import co.clai.video.module.Settings;
 import co.clai.video.module.ManageSubscriptions;
@@ -36,6 +37,8 @@ public class Menu {
 
 	public static List<MenuEntry> loadMenuData(User u) {
 		List<MenuEntry> retList = new ArrayList<>();
+
+		retList.add(dummyMenu.new MenuEntry("UrlSubscription Box", LinkOnlySubscription.LOCATION));
 
 		if (u == null) {
 			retList.add(dummyMenu.new MenuEntry("Newest Videos", Index.INDEX_LOCATION));
