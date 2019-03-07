@@ -77,7 +77,7 @@ public class WatchVideo extends AbstractModule {
 			cols.writeText("recommended videos");
 
 			List<HtmlGenericDiv> videoSuggestions = subscriptionHelper.renderSuggestedVideos(vid, 8);
-			for (int i = 0; i < videoSuggestions.size(); i++) {
+			while (videoSuggestions.size() > 0) {
 				int toRemove = (int) (Math.random() * videoSuggestions.size());
 
 				cols.write(videoSuggestions.remove(toRemove));

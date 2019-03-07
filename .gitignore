@@ -26,5 +26,5 @@ hs_err_pid*
 .classpath
 .project
 .settings/
-log/
+/log
 src/test/resources/credentials.json
