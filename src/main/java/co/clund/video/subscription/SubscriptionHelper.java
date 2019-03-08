@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.ExternalSubscription;
@@ -22,7 +25,7 @@ import co.clund.video.platform.PlatformVideo;
 
 public class SubscriptionHelper {
 
-	private final DatabaseConnector dbCon;
+	final DatabaseConnector dbCon;
 
 	public SubscriptionHelper(DatabaseConnector dbCon) {
 		this.dbCon = dbCon;
@@ -41,9 +44,11 @@ public class SubscriptionHelper {
 		return retList;
 	}
 
-	public List<HtmlGenericDiv> renderOrderedSubscribedVideosFromList(List<String> channelKeys) {
+	public List<HtmlGenericDiv> renderOrderedSubscribedVideosFromList(List<String> channelKeys) throws Exception {
 
 		Map<String, HtmlGenericDiv> subMap = new HashMap<>();
+
+		List<Future<List<PlatformVideo>>> videosFutureList = new ArrayList<>();
 
 		for (String channelKey : channelKeys) {
 
@@ -52,7 +57,23 @@ public class SubscriptionHelper {
 
 			Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
 
-			List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+			FutureTask<List<PlatformVideo>> futureTask = new FutureTask<>(new Callable<List<PlatformVideo>>() {
+				@Override
+				public List<PlatformVideo> call() {
+					return PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+				}
+			});
+
+			@SuppressWarnings("unchecked")
+			FutureTask<List<PlatformVideo>> future = (FutureTask<List<PlatformVideo>>) dbCon
+					.getThreadExecutorMap(plat.getId()).insertTask("videosFromChannel" + channelIdentifier, futureTask);
+
+			videosFutureList.add(future);
+		}
+
+		for (Future<List<PlatformVideo>> f : videosFutureList) {
+
+			List<PlatformVideo> videos = f.get();
 
 			for (PlatformVideo v : videos) {
 				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
@@ -77,7 +98,7 @@ public class SubscriptionHelper {
 		return retList;
 	}
 
-	public List<HtmlGenericDiv> renderOrderedSubscribedVideosList(User thisUser) {
+	public List<HtmlGenericDiv> renderOrderedSubscribedVideosList(User thisUser) throws Exception {
 
 		Map<String, HtmlGenericDiv> subMap = new HashMap<>();
 
@@ -93,11 +114,29 @@ public class SubscriptionHelper {
 			}
 		}
 
+		List<Future<List<PlatformVideo>>> videosFutureList = new ArrayList<>();
+
 		for (ExternalSubscription exSub : ExternalSubscription.getExternalSubscriptionByUserId(dbCon,
 				thisUser.getId())) {
 
-			List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, exSub.getPlatformId(),
-					exSub.getChannelIdentifier());
+			FutureTask<List<PlatformVideo>> futureTask = new FutureTask<>(new Callable<List<PlatformVideo>>() {
+				@Override
+				public List<PlatformVideo> call() {
+					return PlatformVideo.getLatestVideos(dbCon, exSub.getPlatformId(), exSub.getChannelIdentifier());
+				}
+			});
+
+			@SuppressWarnings("unchecked")
+			FutureTask<List<PlatformVideo>> future = (FutureTask<List<PlatformVideo>>) dbCon
+					.getThreadExecutorMap(exSub.getPlatformId())
+					.insertTask("videosFromChannel" + exSub.getChannelIdentifier(), futureTask);
+
+			videosFutureList.add(future);
+		}
+
+		for (Future<List<PlatformVideo>> f : videosFutureList) {
+
+			List<PlatformVideo> videos = f.get();
 
 			for (PlatformVideo v : videos) {
 				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));

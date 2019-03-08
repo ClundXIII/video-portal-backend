@@ -23,6 +23,8 @@ public class Platform extends AbstractDbTable {
 	public static final String DB_TABLE_COLUMN_NAME_TYPE = "type";
 	public static final String DB_TABLE_COLUMN_NAME_CONFIG = "config";
 
+	public static final String PLATFORM_JSON_CONFIG_RATELIMIT = "rate_limit";
+
 	private final static Map<String, DbValueType> columnMap = new HashMap<>();
 	{
 		columnMap.put(DB_TABLE_COLUMN_NAME_ID, DbValueType.INTEGER);
@@ -192,8 +194,8 @@ public class Platform extends AbstractDbTable {
 		dbCon.insert(DB_TABLE_NAME,
 				Arrays.asList(DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_TYPE,
 						DB_TABLE_COLUMN_NAME_CONFIG),
-				Arrays.asList(new DbValue("Youtube"), new DbValue("yt01"), new DbValue("youtube"),
-						new DbValue("{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}")));
+				Arrays.asList(new DbValue("Youtube"), new DbValue("yt01"), new DbValue("youtube"), new DbValue(
+						"{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}")));
 
 		final JSONObject vimeoData = credentialData.getJSONObject("vimeo");
 		dbCon.insert(DB_TABLE_NAME,
@@ -203,7 +205,8 @@ public class Platform extends AbstractDbTable {
 						new DbValue("{\"client_id\":\"" + vimeoData.getString("client_id") + "\","
 								+ "\"client_secret\":\"" + vimeoData.getString("client_secret") + "\","
 								+ "\"oauth2_client_id\":\"" + vimeoData.getString("oauth2_client_id") + "\","
-								+ "\"oauth2_client_secret\":\"" + vimeoData.getString("oauth2_client_secret") + "\"}")));
+								+ "\"oauth2_client_secret\":\"" + vimeoData.getString("oauth2_client_secret")
+								+ "\"}")));
 
 	}
 

@@ -19,6 +19,8 @@ import java.util.logging.Level;
 import org.json.JSONObject;
 
 import co.clund.video.MainHttpListener;
+import co.clund.video.db.model.Platform;
+import co.clund.video.util.RatelimitAbidingThreadPoolExecutor;
 import co.clund.video.util.log.LoggingUtil;
 
 public class DatabaseConnector {
@@ -33,6 +35,8 @@ public class DatabaseConnector {
 
 	public final String uniqueKey;
 
+	private final Map<Integer, RatelimitAbidingThreadPoolExecutor> threadExecutorMap = new HashMap<>();
+
 	public DatabaseConnector(MainHttpListener listener, JSONObject dbConfig) {
 		dbPath = dbConfig.getString("path");
 		dbUser = dbConfig.getString("username");
@@ -41,6 +45,27 @@ public class DatabaseConnector {
 		this.listener = listener;
 
 		uniqueKey = dbUser + "+" + dbPath + "_" + (int) (Math.random() * 100.f);
+	}
+
+	public RatelimitAbidingThreadPoolExecutor getThreadExecutorMap(int platformId) {
+
+		if (!threadExecutorMap.containsKey(new Integer(platformId))) {
+			int ratelimit = 100;
+
+			try {
+				Platform plat = Platform.getPlatformById(this, platformId);
+
+				ratelimit = plat.getConfig().getInt(Platform.PLATFORM_JSON_CONFIG_RATELIMIT);
+			} catch (Exception e) {
+				logger.log(Level.WARNING, "no ratelimit set for platform with id " + platformId
+						+ ", defaulting to 100!\n" + e.getMessage());
+				e.printStackTrace();
+			}
+
+			threadExecutorMap.put(new Integer(platformId), new RatelimitAbidingThreadPoolExecutor(ratelimit));
+		}
+
+		return threadExecutorMap.get(new Integer(platformId));
 	}
 
 	private Connection openConnection() throws SQLException {

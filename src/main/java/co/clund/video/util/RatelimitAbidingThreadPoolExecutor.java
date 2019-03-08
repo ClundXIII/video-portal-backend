@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -12,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class RatelimitAbidingThreadPoolExecutor<V extends Object, T extends Future<V>> extends ThreadPoolExecutor {
+public class RatelimitAbidingThreadPoolExecutor extends ThreadPoolExecutor {
 
 	private final static int corePoolSize = 5;
 	private final static int maximumPoolSize = 10;
@@ -30,7 +29,7 @@ public class RatelimitAbidingThreadPoolExecutor<V extends Object, T extends Futu
 	public RatelimitAbidingThreadPoolExecutor(int rateLimit) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>());
 
-		final RatelimitAbidingThreadPoolExecutor<V, T> tmpMother = this;
+		final RatelimitAbidingThreadPoolExecutor tmpMother = this;
 		rateLimitTimer.schedule(new TimerTask() {
 
 			long lastAmountFinished = 0;
@@ -98,9 +97,9 @@ public class RatelimitAbidingThreadPoolExecutor<V extends Object, T extends Futu
 		}
 	}
 
-	Map<String, FutureTask<V>> taskMap = new HashMap<>();
+	Map<String, FutureTask<?>> taskMap = new HashMap<>();
 
-	public FutureTask<V> insertTask(String identifier, FutureTask<V> task) {
+	public FutureTask<?> insertTask(String identifier, FutureTask<?> task) {
 		if (taskMap.containsKey(identifier)) {
 			return taskMap.get(identifier);
 		}
