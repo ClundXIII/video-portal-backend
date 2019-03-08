@@ -45,7 +45,7 @@ public class LinkOnlySubscription extends AbstractModule {
 	}
 
 	@Override
-	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters){
+	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
 		HtmlPage b = new HtmlPage("Url Subscription - Video Portal", null, null, s);
 
@@ -56,10 +56,15 @@ public class LinkOnlySubscription extends AbstractModule {
 		if (parameters.containsKey(GET_PARAM_SUB)) {
 			List<HtmlGenericDiv> list;
 			try {
-				list = subHelper
-						.renderOrderedSubscribedVideosFromList(Arrays.asList(parameters.get(GET_PARAM_SUB)));
+				list = subHelper.renderOrderedSubscribedVideosFromList(Arrays.asList(parameters.get(GET_PARAM_SUB)));
+
+				int videoDisplayCount = 0;
 				for (HtmlGenericDiv div : list) {
+					if (videoDisplayCount > 50) {
+						break;
+					}
 					cols.write(div);
+					videoDisplayCount++;
 				}
 			} catch (Exception e) {
 				cols.writeText("error while loading videos: " + e.getMessage());

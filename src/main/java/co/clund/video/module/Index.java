@@ -86,7 +86,7 @@ public class Index extends AbstractModule {
 
 						int videoDisplayCount = 0;
 						for (Builder video : newVideos) {
-							if (videoDisplayCount > 30) {
+							if (videoDisplayCount > 50) {
 								break;
 							}
 							newVidsDiv.write(video);
@@ -122,7 +122,7 @@ public class Index extends AbstractModule {
 			} else {
 				int videoDisplayCount = 0;
 				for (Builder video : newVideos) {
-					if (videoDisplayCount>10) {
+					if (videoDisplayCount > 10) {
 						break;
 					}
 					newVidsDiv.write(video);
