@@ -1,5 +1,6 @@
 package co.clund.video.module;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+
+import org.apache.http.client.utils.URIBuilder;
 
 import co.clund.video.UserSession;
 import co.clund.video.db.DatabaseConnector;
@@ -160,6 +163,27 @@ public class ManageSubscriptions extends AbstractModule {
 		cols.write(extSubTable);
 
 		p.write(cols);
+
+		p.writeText(
+				"If you want to use this subscription list without logging in or share it with a friend, use this link: ");
+
+		try {
+			URIBuilder urlSubBuilder = new URIBuilder(LinkOnlySubscription.LOCATION);
+
+			for (ExternalSubscription sub : externalSubs) {
+				Platform plat = Platform.getPlatformById(dbCon, sub.getPlatformId());
+
+				urlSubBuilder.addParameter(LinkOnlySubscription.GET_PARAM_SUB,
+						plat.getKey() + "_" + sub.getChannelIdentifier());
+			}
+
+			p.writeLink(urlSubBuilder, "url Based Subscription Box");
+		} catch (URISyntaxException e) {
+			logger.log(Level.WARNING,
+					"error while trying to create sub export list link for user id " + thisUser.getId());
+			e.printStackTrace();
+		}
+
 		return p.finish().getBytes();
 	}
 
