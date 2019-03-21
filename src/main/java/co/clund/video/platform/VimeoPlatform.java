@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -14,8 +16,7 @@ import org.json.JSONObject;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
 import co.clund.video.html.HtmlGenericDiv;
-import co.clund.video.util.StringStringPair;
-import co.clund.video.util.cache.Cache;
+import co.clund.video.util.HttpRequestUtil;
 
 public class VimeoPlatform extends AbstractPlatform {
 
@@ -78,16 +79,14 @@ public class VimeoPlatform extends AbstractPlatform {
 			thirdCut = secondCut;
 		}
 
-		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + thirdCut, new ArrayList<>(),
-				httpCache);
+		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + thirdCut);
 
 		return rawVidData.getString("uri").replace("/users/", "");
 	}
 
 	@Override
 	public String getOriginalChannelLink(String channelIdentifier) {
-		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + channelIdentifier,
-				new ArrayList<>(), httpCache);
+		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + channelIdentifier);
 
 		String uri = rawVidData.getJSONObject("metadata").getJSONObject("connections").getJSONObject("videos")
 				.getString("uri");
@@ -105,8 +104,7 @@ public class VimeoPlatform extends AbstractPlatform {
 	@Override
 	public List<PlatformVideo> getLatestVideos(String channelIdentifier, int count) {
 		JSONObject returnData = requestCachedJSONDataGetWithAuthToken(
-				API_URL + "users/" + channelIdentifier + "/videos?direction=desc&per_page=" + count + "&sort=date",
-				new ArrayList<>(), httpCache);
+				API_URL + "users/" + channelIdentifier + "/videos?direction=desc&per_page=" + count + "&sort=date");
 
 		List<PlatformVideo> retList = new ArrayList<>();
 
@@ -146,8 +144,8 @@ public class VimeoPlatform extends AbstractPlatform {
 				logger.log(Level.INFO, "no description: " + e.getMessage());
 			}
 
-			retList.add(new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier, forceNewTab,
-					rawVidData.getString("name"), description));
+			retList.add(new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier,
+					forceNewTab, rawVidData.getString("name"), description));
 		}
 
 		return retList;
@@ -155,8 +153,7 @@ public class VimeoPlatform extends AbstractPlatform {
 
 	@Override
 	public PlatformVideo getVideoInfo(String identifier) {
-		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "videos/" + identifier,
-				new ArrayList<>(), httpCache);
+		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "videos/" + identifier);
 
 		Date publishDate = new Date(System.currentTimeMillis());
 		try {
@@ -187,14 +184,13 @@ public class VimeoPlatform extends AbstractPlatform {
 			logger.log(Level.INFO, "no description: " + e.getMessage());
 		}
 
-		return new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier, forceNewTab,
-				rawVidData.getString("name"), description);
+		return new PlatformVideo(platform.getId(), publishDate, thumbnailLink, identifier, channelIdentifier,
+				forceNewTab, rawVidData.getString("name"), description);
 	}
 
 	@Override
 	public HtmlGenericDiv renderVideo(PlatformVideo vid) {
-		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "videos/" + vid.getVideoIdentifier(),
-				new ArrayList<>(), httpCache);
+		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "videos/" + vid.getVideoIdentifier());
 		HtmlGenericDiv div = new HtmlGenericDiv();
 
 		div.writeWithoutEscaping(rawVidData.getJSONObject("embed").getString("html"));
@@ -209,20 +205,19 @@ public class VimeoPlatform extends AbstractPlatform {
 
 	@Override
 	public String getUserName(String channelIdentifier) {
-		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + channelIdentifier,
-				new ArrayList<>(), httpCache);
+		JSONObject rawVidData = requestCachedJSONDataGetWithAuthToken(API_URL + "users/" + channelIdentifier);
 
 		return rawVidData.getString("name");
 	}
 
-	private JSONObject requestCachedJSONDataGetWithAuthToken(String scriptLocation, List<StringStringPair> parameters,
-			Cache<JSONObject> cache) {
+	private JSONObject requestCachedJSONDataGetWithAuthToken(String scriptLocation) {
 
-		List<StringStringPair> headerParams = new ArrayList<>();
-		headerParams.add(new StringStringPair("Accept", "application/vnd.vimeo.*+json; version=3.2"));
-		headerParams.add(new StringStringPair("Authorization", "basic " + apiKey));
+		Map<String, String> headerParams = new HashMap<>();
+		headerParams.put("Accept", "application/vnd.vimeo.*+json; version=3.2");
+		headerParams.put("Authorization", "basic " + apiKey);
 
-		return requestCachedJSONDataGetWithHeader(scriptLocation, parameters, headerParams, cache);
+		return new JSONObject(
+				new String(HttpRequestUtil.httpGetRequestWithHeader(scriptLocation, new HashMap<>(), headerParams)));
 	}
 
 	@Override

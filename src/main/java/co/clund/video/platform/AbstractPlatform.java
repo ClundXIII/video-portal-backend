@@ -7,26 +7,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
 import org.reflections.Reflections;
 
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
 import co.clund.video.html.HtmlGenericDiv;
-import co.clund.video.util.AbstractCachedQueryConnection;
-import co.clund.video.util.cache.Cache;
-import co.clund.video.util.cache.ExpiringCache;
+import co.clund.video.util.log.LoggingUtil;
 
-public abstract class AbstractPlatform extends AbstractCachedQueryConnection {
+public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection */ {
 
 	public static final String REMOTE_LOCATION_CONFIG_KEY_TYPE = "type";
 	// public static final String UNIQUE_ID_KEY = "uniqueId";
 
 	private static final Map<String, Class<? extends AbstractPlatform>> allAbstractPlatform = loadAbstractPlatform();
 
+	protected final Logger logger = LoggingUtil.getDefaultLogger();
+
 	private static Map<String, Class<? extends AbstractPlatform>> loadAbstractPlatform() {
+
+		Logger logger = LoggingUtil.getDefaultLogger();
 
 		Map<String, Class<? extends AbstractPlatform>> reMap = new HashMap<>();
 
@@ -34,7 +36,7 @@ public abstract class AbstractPlatform extends AbstractCachedQueryConnection {
 		Set<Class<? extends AbstractPlatform>> allClasses = reflections.getSubTypesOf(AbstractPlatform.class);
 
 		for (Class<? extends AbstractPlatform> c : allClasses) {
-			logger.log(Level.INFO, "loading abstract Storage class " + c.getName());
+			logger.log(Level.INFO, "loading abstract Platform class " + c.getName());
 			String name = null;
 			try {
 				Constructor<? extends AbstractPlatform> cons = c.getConstructor(Platform.class);
@@ -77,6 +79,7 @@ public abstract class AbstractPlatform extends AbstractCachedQueryConnection {
 
 	public static AbstractPlatform getPlatformFromConfig(Platform stor) {
 		Class<? extends AbstractPlatform> c = allAbstractPlatform.get(stor.getType());
+		Logger logger = LoggingUtil.getDefaultLogger();
 
 		try {
 			Constructor<? extends AbstractPlatform> cons = c.getConstructor(Platform.class);
@@ -95,16 +98,9 @@ public abstract class AbstractPlatform extends AbstractCachedQueryConnection {
 	}
 
 	protected final Platform platform;
-	protected final Cache<JSONObject> httpCache;
 
 	AbstractPlatform(Platform platform) {
 		this.platform = platform;
-
-		if (platform != null) {
-			httpCache = new ExpiringCache<>("http_plat_" + platform.getId());
-		} else {
-			httpCache = new ExpiringCache<>("http_plat_" + (int) ((Math.random() * 1000.f)));
-		}
 	}
 
 	Platform getPlatform() {

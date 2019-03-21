@@ -4,7 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -16,7 +18,7 @@ import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlStyleConstants;
-import co.clund.video.util.StringStringPair;
+import co.clund.video.util.HttpRequestUtil;
 
 public class YoutubePlatform extends AbstractPlatform {
 
@@ -52,15 +54,15 @@ public class YoutubePlatform extends AbstractPlatform {
 	public List<PlatformVideo> getLatestVideos(String channelIdentifier, int count) {
 		List<PlatformVideo> retList = new ArrayList<>();
 
-		List<StringStringPair> parameters = new ArrayList<>();
+		Map<String, String> parameters = new HashMap<>();
 
-		parameters.add(new StringStringPair("key", apiKey));
-		parameters.add(new StringStringPair("part", "snippet,contentDetails"));
-		parameters.add(new StringStringPair("channelId", channelIdentifier));
-		parameters.add(new StringStringPair("maxResults", (count > 50 ? 50 : count) + ""));
+		parameters.put("key", apiKey);
+		parameters.put("part", "snippet,contentDetails");
+		parameters.put("channelId", channelIdentifier);
+		parameters.put("maxResults", (count > 50 ? 50 : count) + "");
 
-		JSONObject rawVidData = requestCachedJSONDataGet("https://www.googleapis.com/youtube/v3/activities", parameters,
-				httpCache);
+		JSONObject rawVidData = new JSONObject(new String(
+				HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/activities", parameters)));
 
 		JSONArray items = rawVidData.getJSONArray("items");
 
@@ -93,14 +95,14 @@ public class YoutubePlatform extends AbstractPlatform {
 	public PlatformVideo getVideoInfo(String identifier) {
 
 		try {
-			List<StringStringPair> parameters = new ArrayList<>();
+			Map<String, String> parameters = new HashMap<>();
 
-			parameters.add(new StringStringPair("key", apiKey));
-			parameters.add(new StringStringPair("id", identifier));
-			parameters.add(new StringStringPair("part", "snippet"));
+			parameters.put("key", apiKey);
+			parameters.put("id", identifier);
+			parameters.put("part", "snippet");
 
-			JSONObject rawVidData = requestCachedJSONDataGet("https://www.googleapis.com/youtube/v3/videos", parameters,
-					httpCache);
+			JSONObject rawVidData = new JSONObject(new String(
+					HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/videos", parameters)));
 
 			if (rawVidData.getJSONArray("items").length() == 0) {
 				logger.log(Level.WARNING, "No video found with id " + identifier);
@@ -133,8 +135,9 @@ public class YoutubePlatform extends AbstractPlatform {
 		String channelIdentifier = videoData.getString("channelId");
 		int platformId = platform.getId();
 
-		PlatformVideo platVid = new PlatformVideo(-1, -1, -1, platformId, date, thumpnailLink, identifier, channelIdentifier, forceNewTab,
-				title, description, HtmlStyleConstants.DIV_CLASS_VIDEO_YOUTUBE_THUMBNAIL);
+		PlatformVideo platVid = new PlatformVideo(-1, -1, -1, platformId, date, thumpnailLink, identifier,
+				channelIdentifier, forceNewTab, title, description,
+				HtmlStyleConstants.DIV_CLASS_VIDEO_YOUTUBE_THUMBNAIL);
 		return platVid;
 	}
 
@@ -182,14 +185,14 @@ public class YoutubePlatform extends AbstractPlatform {
 				thirdCut = secondCut;
 			}
 
-			List<StringStringPair> parameters = new ArrayList<>();
+			Map<String, String> parameters = new HashMap<>();
 
-			parameters.add(new StringStringPair("key", apiKey));
-			parameters.add(new StringStringPair("part", "id"));
-			parameters.add(new StringStringPair("forUsername", thirdCut));
+			parameters.put("key", apiKey);
+			parameters.put("part", "id");
+			parameters.put("forUsername", thirdCut);
 
-			JSONObject rawVidData = requestCachedJSONDataGet("https://www.googleapis.com/youtube/v3/channels",
-					parameters, httpCache);
+			JSONObject rawVidData = new JSONObject(new String(
+					HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/channels", parameters)));
 
 			String channelId = rawVidData.getJSONArray("items").getJSONObject(0).getString("id");
 
@@ -225,14 +228,14 @@ public class YoutubePlatform extends AbstractPlatform {
 
 	@Override
 	public String getChannelName(String channelIdentifier) {
-		List<StringStringPair> parameters = new ArrayList<>();
+		Map<String, String> parameters = new HashMap<>();
 
-		parameters.add(new StringStringPair("key", apiKey));
-		parameters.add(new StringStringPair("part", "snippet"));
-		parameters.add(new StringStringPair("id", channelIdentifier));
+		parameters.put("key", apiKey);
+		parameters.put("part", "snippet");
+		parameters.put("id", channelIdentifier);
 
-		JSONObject rawVidData = requestCachedJSONDataGet("https://www.googleapis.com/youtube/v3/channels", parameters,
-				httpCache);
+		JSONObject rawVidData = new JSONObject(
+				new String(HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/channels", parameters)));
 
 		String channelTitle = rawVidData.getJSONArray("items").getJSONObject(0).getJSONObject("snippet")
 				.getString("title");

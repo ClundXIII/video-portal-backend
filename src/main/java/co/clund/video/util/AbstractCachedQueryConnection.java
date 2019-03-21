@@ -13,6 +13,7 @@ import co.clund.video.util.StringStringPair;
 import co.clund.video.util.cache.Cache;
 import co.clund.video.util.log.LoggingUtil;
 
+@Deprecated
 public abstract class AbstractCachedQueryConnection {
 
 	protected final static Logger logger = LoggingUtil.getDefaultLogger();

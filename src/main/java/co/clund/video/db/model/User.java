@@ -65,7 +65,12 @@ public class User extends AbstractDbTable {
 				new DbValue(username), dummyUser.getColumns());
 
 		if (results.isEmpty()) {
-			return null;
+			results = dbCon.select(DB_TABLE_NAME, DB_TABLE_COLUMN_NAME_EMAIL, new DbValue(username),
+					dummyUser.getColumns());
+
+			if (results.isEmpty()) {
+				return null;
+			}
 		}
 
 		Map<String, DbValue> result = results.get(0);

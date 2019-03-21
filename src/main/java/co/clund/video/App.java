@@ -33,15 +33,15 @@ public class App {
 		logger.log(Level.INFO, "starting program ...");
 
 		if (args.length == 0) {
-			System.out.println("Welcome to the clai Video Portal!");
+			System.out.println("Welcome to the Video Portal Backend!");
 			System.out.println("usage:");
-			System.out.println("java -jar acp-java.jar generate-tables <config file>");
+			System.out.println("java -jar video-portal-backend.jar generate-tables <config file>");
 			System.out.println("  --> generates the initial tables");
 			System.out.println("");
-			System.out.println("java -jar acp-java.jar add-superadmin <config file> <Username> <Password> <email>");
+			System.out.println("java -jar video-portal-backend.jar add-superadmin <config file> <Username> <Password> <email>");
 			System.out.println("  --> adds a user with root flag");
 			System.out.println("");
-			System.out.println("java -jar acp-java.jar <config file>");
+			System.out.println("java -jar video-portal-backend.jar <config file>");
 			System.out.println("  --> start the video platform");
 			System.out.println("");
 

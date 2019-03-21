@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import co.clund.video.util.log.LoggingUtil;
 
+@Deprecated
 public class ExpiringCache<T> implements Cache<T> {
 
 	private static Map<String, ExpiringCacheEntry> data = new HashMap<>();
