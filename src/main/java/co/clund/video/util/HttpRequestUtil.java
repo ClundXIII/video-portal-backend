@@ -2,20 +2,23 @@ package co.clund.video.util;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import org.apache.http.client.utils.URIBuilder;
 
 import com.amazonaws.util.IOUtils;
+
+import co.clund.video.util.log.LoggingUtil;
 
 public class HttpRequestUtil {
 
@@ -26,7 +29,7 @@ public class HttpRequestUtil {
 	public static String httpRequest(String queryScriptLocation, Map<String, String> parameter) {
 
 		URL testUrl;
-		URLConnection testCon = null;
+		HttpURLConnection testCon = null;
 		try {
 			URIBuilder builder = new URIBuilder(queryScriptLocation);
 			if (parameter != null) {
@@ -36,22 +39,43 @@ public class HttpRequestUtil {
 			}
 
 			testUrl = new URL(builder.toString());
-			testCon = testUrl.openConnection();
+			testCon = (HttpURLConnection) testUrl.openConnection();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
 		StringBuilder sb = new StringBuilder();
 
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(testCon.getInputStream()));) {
+		try {
+			if (200 <= testCon.getResponseCode() && testCon.getResponseCode() <= 299) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(testCon.getInputStream()));) {
 
-			String inputLine;
+					String inputLine;
 
-			while ((inputLine = in.readLine()) != null) {
-				sb.append(inputLine + "\n");
+					while ((inputLine = in.readLine()) != null) {
+						sb.append(inputLine + "\n");
+					}
+
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+
+			} else {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(testCon.getErrorStream()));) {
+
+					String inputLine;
+
+					while ((inputLine = in.readLine()) != null) {
+						sb.append(inputLine + "\n");
+					}
+
+					LoggingUtil.getDefaultLogger().log(Level.WARNING, "received error message: " + sb.toString());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+
 			}
-
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 

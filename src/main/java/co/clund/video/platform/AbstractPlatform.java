@@ -14,7 +14,9 @@ import org.reflections.Reflections;
 
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.HtmlGenericDiv;
+import co.clund.video.util.cache.DynamicAsyncExpiringCache;
 import co.clund.video.util.log.LoggingUtil;
 
 public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection */ {
@@ -111,25 +113,93 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 	public abstract List<Pattern> getSubscriptionRegExps();
 
-	public abstract String getChannelIdentifierFromUrl(String url);
+	public abstract String getOAuth2ConnectRedirect(DatabaseConnector dbCon);
+
+	// functions that do not need caching:
 
 	public abstract String getOriginalChannelLink(String channelIdentifier);
 
 	abstract String getOriginalVideoLink(PlatformVideo vid);
 
-	List<PlatformVideo> getLatestVideos(String channelIdentifier) {
+	public abstract String getChannelIdentifierFromUrl(String url) throws RateLimitException;
+
+	// these are not cached, caching takes place in subscription helper
+	List<PlatformVideo> getLatestVideos(String channelIdentifier) throws RateLimitException {
 		return getLatestVideos(channelIdentifier, 100);
 	}
 
-	abstract List<PlatformVideo> getLatestVideos(String channelIdentifier, int count);
+	abstract List<PlatformVideo> getLatestVideos(String channelIdentifier, int count) throws RateLimitException;
 
-	abstract PlatformVideo getVideoInfo(String identifier);
+	// protected functions to be implemented by platforms
+	protected abstract PlatformVideo getVideoInfo(String identifier) throws RateLimitException;
 
-	abstract HtmlGenericDiv renderVideo(PlatformVideo vid);
+	protected abstract HtmlGenericDiv renderVideo(PlatformVideo vid) throws RateLimitException;
 
-	public abstract String getChannelName(String channelIdentifier);
+	protected abstract String getChannelName(String channelIdentifier) throws RateLimitException;
 
-	public abstract String getUserName(String channelIdentifier);
+	protected abstract String getUserName(String channelIdentifier) throws RateLimitException;
 
-	public abstract String getOAuth2ConnectRedirect(DatabaseConnector dbCon);
+	// functions to be used from other places, these are cached
+
+	final static DynamicAsyncExpiringCache<PlatformVideo> getVideoCache = new DynamicAsyncExpiringCache<>(
+			"getVideoCache", 60 * 60); // 1 hour
+
+	PlatformVideo getCachedVideoInfo(String identifier) throws RateLimitException {
+		String key = this.platform.getKey() + "_" + identifier;
+
+		PlatformVideo value = getVideoCache.retrieve(key);
+		if (value != null) {
+			return value;
+		}
+
+		value = getVideoInfo(identifier);
+		getVideoCache.put(key, value);
+		return value;
+	}
+
+	final static DynamicAsyncExpiringCache<HtmlGenericDiv> videoRenderCache = new DynamicAsyncExpiringCache<>(
+			"videoRenderCache", 60 * 60); // 1 hour
+
+	HtmlGenericDiv renderCachedVideo(PlatformVideo vid) throws RateLimitException {
+
+		String key = this.platform.getKey() + "_" + vid.getVideoIdentifier();
+
+		HtmlGenericDiv value = videoRenderCache.retrieve(key);
+		if (value != null) {
+			return value;
+		}
+
+		value = renderVideo(vid);
+		videoRenderCache.put(key, value);
+		return value;
+	}
+
+	final static DynamicAsyncExpiringCache<String> channelNameCache = new DynamicAsyncExpiringCache<>(
+			"channelNameCache", 50 * 24 * 60 * 60); // 50 days
+
+	public String getCachedChannelName(String channelIdentifier) throws RateLimitException {
+		String value = channelNameCache.retrieve(channelIdentifier);
+		if (value != null) {
+			return value;
+		}
+
+		value = getChannelName(channelIdentifier);
+		channelNameCache.put(channelIdentifier, value);
+		return value;
+	}
+
+	final static DynamicAsyncExpiringCache<String> userNameCache = new DynamicAsyncExpiringCache<>("userNameCache",
+			50 * 24 * 60 * 60); // 50 days
+
+	public String getCachedUserName(String channelIdentifier) throws RateLimitException {
+		String value = userNameCache.retrieve(channelIdentifier);
+		if (value != null) {
+			return value;
+		}
+
+		value = getUserName(channelIdentifier);
+		userNameCache.put(channelIdentifier, value);
+		return value;
+	}
+
 }

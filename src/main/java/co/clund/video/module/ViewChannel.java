@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 
 import co.clund.video.UserSession;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlPage;
 import co.clund.video.platform.AbstractPlatform;
@@ -41,7 +43,12 @@ public class ViewChannel extends AbstractModule {
 
 		String channelIdentifier = id.substring(id.indexOf("_") + 1);
 
-		channelName = abPlat.getChannelName(channelIdentifier);
+		try {
+			channelName = abPlat.getCachedChannelName(channelIdentifier);
+		} catch (RateLimitException e) {
+			logger.log(Level.WARNING, "Error getting channel name: " + e.getMessage());
+			channelName = channelIdentifier;
+		}
 
 		HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
 
@@ -51,10 +58,25 @@ public class ViewChannel extends AbstractModule {
 
 		div.newLine();
 
-		List<PlatformVideo> videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+		List<PlatformVideo> videos;
+		try {
+			videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+		} catch (RateLimitException e) {
+			p.write(div);
+
+			p.writeText("error: ratelimit reached!");
+			logger.log(Level.WARNING, "error: ratelimit reached: " + e.getMessage());
+			return p.finish().getBytes();
+		}
 
 		for (PlatformVideo v : videos) {
-			div.write(v.renderPreview(dbCon));
+			try {
+				div.write(v.renderPreview(dbCon));
+			} catch (RateLimitException e) {
+				div.writeText("cannot load more videos, ratelimit reached!");
+				logger.log(Level.WARNING, "error: ratelimit reached: " + e.getMessage());
+				break;
+			}
 		}
 
 		div.newLine();

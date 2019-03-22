@@ -141,9 +141,9 @@ public class ManageSubscriptions extends AbstractModule {
 				AbstractPlatform f = AbstractPlatform.getPlatformFromConfig(plat);
 
 				row.writeLink(f.getOriginalChannelLink(extSub.getChannelIdentifier()),
-						f.getChannelName(extSub.getChannelIdentifier()), true);
+						f.getCachedChannelName(extSub.getChannelIdentifier()), true);
 
-				row.writeText(f.getUserName(extSub.getChannelIdentifier()));
+				row.writeText(f.getCachedUserName(extSub.getChannelIdentifier()));
 
 				row.writeText(plat.getName());
 

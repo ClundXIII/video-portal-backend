@@ -10,6 +10,7 @@ import co.clund.video.HttpTest;
 import co.clund.video.MainHttpListener;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.platform.PlatformVideo;
 import co.clund.video.platform.YoutubePlatform;
 import co.clund.video.util.ResourceUtil;
@@ -22,7 +23,7 @@ public class YoutubeTest extends TestCase implements HttpTest {
 		super(name);
 	}
 
-	public void testAllFunctions() {
+	public void testAllFunctions() throws RateLimitException {
 		Logger logger = LoggingUtil.getDefaultLogger();
 
 		logger.log(Level.INFO, "running test " + getName());

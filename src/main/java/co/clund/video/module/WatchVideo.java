@@ -64,7 +64,7 @@ public class WatchVideo extends AbstractModule {
 
 			channelBuilder.addParameter("id", platformById.getKey() + "_" + vid.getChannelIdentifier());
 
-			cols.writeLink(channelBuilder.toString(), plat.getChannelName(vid.getChannelIdentifier()), false);
+			cols.writeLink(channelBuilder.toString(), plat.getCachedChannelName(vid.getChannelIdentifier()), false);
 
 			cols.newLine();
 			cols.writeLink(vid.getOriginalVideoLink(dbCon), "click here if the video doesnt load", true);

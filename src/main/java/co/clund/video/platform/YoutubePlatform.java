@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlStyleConstants;
 import co.clund.video.util.HttpRequestUtil;
@@ -51,7 +52,7 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public List<PlatformVideo> getLatestVideos(String channelIdentifier, int count) {
+	public List<PlatformVideo> getLatestVideos(String channelIdentifier, int count) throws RateLimitException {
 		List<PlatformVideo> retList = new ArrayList<>();
 
 		Map<String, String> parameters = new HashMap<>();
@@ -63,6 +64,16 @@ public class YoutubePlatform extends AbstractPlatform {
 
 		JSONObject rawVidData = new JSONObject(new String(
 				HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/activities", parameters)));
+
+		if (rawVidData.has("error")) {
+			JSONArray array = rawVidData.getJSONArray("errors");
+			for (int i = 0; i < array.length(); i++) {
+				if (array.getJSONObject(i).getString("domain").equals("usageLimits")) {
+					throw new RateLimitException(rawVidData.toString(4));
+				}
+			}
+			throw new RuntimeException(rawVidData.toString(4));
+		}
 
 		JSONArray items = rawVidData.getJSONArray("items");
 
@@ -103,6 +114,16 @@ public class YoutubePlatform extends AbstractPlatform {
 
 			JSONObject rawVidData = new JSONObject(new String(
 					HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/videos", parameters)));
+
+			if (rawVidData.has("error")) {
+				JSONArray array = rawVidData.getJSONArray("errors");
+				for (int i = 0; i < array.length(); i++) {
+					if (array.getJSONObject(i).getString("domain").equals("usageLimits")) {
+						throw new RateLimitException(rawVidData.toString(4));
+					}
+				}
+				throw new RuntimeException(rawVidData.toString(4));
+			}
 
 			if (rawVidData.getJSONArray("items").length() == 0) {
 				logger.log(Level.WARNING, "No video found with id " + identifier);
@@ -165,7 +186,7 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public String getChannelIdentifierFromUrl(String url) {
+	public String getChannelIdentifierFromUrl(String url) throws RateLimitException {
 
 		if (CHANNEL_REGEXP_USER.matcher(url).find()) {
 
@@ -193,6 +214,16 @@ public class YoutubePlatform extends AbstractPlatform {
 
 			JSONObject rawVidData = new JSONObject(new String(
 					HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/channels", parameters)));
+
+			if (rawVidData.has("error")) {
+				JSONArray array = rawVidData.getJSONArray("errors");
+				for (int i = 0; i < array.length(); i++) {
+					if (array.getJSONObject(i).getString("domain").equals("usageLimits")) {
+						throw new RateLimitException(rawVidData.toString(4));
+					}
+				}
+				throw new RuntimeException(rawVidData.toString(4));
+			}
 
 			String channelId = rawVidData.getJSONArray("items").getJSONObject(0).getString("id");
 
@@ -227,7 +258,7 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public String getChannelName(String channelIdentifier) {
+	public String getChannelName(String channelIdentifier) throws RateLimitException {
 		Map<String, String> parameters = new HashMap<>();
 
 		parameters.put("key", apiKey);
@@ -237,6 +268,16 @@ public class YoutubePlatform extends AbstractPlatform {
 		JSONObject rawVidData = new JSONObject(
 				new String(HttpRequestUtil.httpRequest("https://www.googleapis.com/youtube/v3/channels", parameters)));
 
+		if (rawVidData.has("error")) {
+			JSONArray array = rawVidData.getJSONArray("errors");
+			for (int i = 0; i < array.length(); i++) {
+				if (array.getJSONObject(i).getString("domain").equals("usageLimits")) {
+					throw new RateLimitException(rawVidData.toString(4));
+				}
+			}
+			throw new RuntimeException(rawVidData.toString(4));
+		}
+
 		String channelTitle = rawVidData.getJSONArray("items").getJSONObject(0).getJSONObject("snippet")
 				.getString("title");
 
@@ -244,7 +285,7 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public String getUserName(String channelIdentifier) {
+	public String getUserName(String channelIdentifier) throws RateLimitException {
 		return getChannelName(channelIdentifier);
 	}
 

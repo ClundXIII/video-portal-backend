@@ -7,6 +7,7 @@ import co.clund.video.UserSession;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.ClientCommunityChannelAccess;
 import co.clund.video.db.model.ClientCommunityToken;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.Builder;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.module.FunctionResult;
@@ -31,7 +32,13 @@ public class Video extends AbstractApiFunction {
 			return new FunctionResult("{\"error\":\"true\"}".getBytes());
 		}
 
-		PlatformVideo vid = PlatformVideo.getVideo(dbCon, parameters.get(PlatformVideo.FULL_VIDEO_KEY)[0]);
+		PlatformVideo vid;
+		try {
+			vid = PlatformVideo.getVideo(dbCon, parameters.get(PlatformVideo.FULL_VIDEO_KEY)[0]);
+		} catch (RateLimitException e) {
+			logger.log(Level.SEVERE, e.getMessage());
+			return new FunctionResult("{\"error\":\"true\"}".getBytes());
+		}
 
 		ClientCommunityChannelAccess access = ClientCommunityChannelAccess
 				.getClientCommunityChannelAccessByCommunityChannel(dbCon, tokenC.getClientCommunityId(),

@@ -13,12 +13,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class RatelimitAbidingThreadPoolExecutor extends ThreadPoolExecutor {
 
-	private final static int corePoolSize = 5;
-	private final static int maximumPoolSize = 10;
+	private final static int corePoolSize = 9;
+	private final static int maximumPoolSize = 50;
 	private final static long keepAliveTime = 5;
 	private final static TimeUnit unit = TimeUnit.SECONDS;
 
-	private Timer rateLimitTimer = new Timer();
+	private final Timer rateLimitTimer = new Timer();
 
 	private final int rateLimiterScheduleFrequency = 10;
 
@@ -29,8 +29,10 @@ public class RatelimitAbidingThreadPoolExecutor extends ThreadPoolExecutor {
 	public RatelimitAbidingThreadPoolExecutor(int rateLimit) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>());
 
-		final RatelimitAbidingThreadPoolExecutor tmpMother = this;
-		rateLimitTimer.schedule(new TimerTask() {
+		/*final RatelimitAbidingThreadPoolExecutor tmpMother = this;
+		final Timer tmpRateLimitTimer = rateLimitTimer;
+
+		final TimerTask task = new TimerTask() {
 
 			long lastAmountFinished = 0;
 
@@ -55,9 +57,13 @@ public class RatelimitAbidingThreadPoolExecutor extends ThreadPoolExecutor {
 				}
 
 				lastAmountFinished = currentlyFinished;
+
+				tmpRateLimitTimer.schedule(this, 1000 / rateLimiterScheduleFrequency);
 			}
 
-		}, 1000 / rateLimiterScheduleFrequency);
+		};
+
+		rateLimitTimer.schedule(task, 1000 / rateLimiterScheduleFrequency);*/
 	}
 
 	private boolean isPaused;
@@ -67,6 +73,7 @@ public class RatelimitAbidingThreadPoolExecutor extends ThreadPoolExecutor {
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) {
 		super.beforeExecute(t, r);
+
 		pauseLock.lock();
 		try {
 			while (isPaused)

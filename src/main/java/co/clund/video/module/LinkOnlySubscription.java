@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -16,6 +17,7 @@ import org.apache.http.client.utils.URIBuilder;
 import co.clund.video.UserSession;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.HtmlForm;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlPage;
@@ -93,8 +95,14 @@ public class LinkOnlySubscription extends AbstractModule {
 
 				AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
 
-				thisRow.writeLink(abPlat.getOriginalChannelLink(channelIdentifier),
-						abPlat.getChannelName(channelIdentifier), true);
+				try {
+					thisRow.writeLink(abPlat.getOriginalChannelLink(channelIdentifier),
+							abPlat.getCachedChannelName(channelIdentifier), true);
+				} catch (RateLimitException e) {
+					logger.log(Level.WARNING, "Error while getting channel name: " + e.getMessage());
+					thisRow.writeLink(abPlat.getOriginalChannelLink(channelIdentifier),
+							"<error>", true);
+				}
 
 				Set<String> allChannelsCpy = new HashSet<>(allChannels);
 
@@ -146,8 +154,8 @@ public class LinkOnlySubscription extends AbstractModule {
 
 	@SuppressWarnings("unused")
 	private FunctionResult addChannel(UserSession s, Map<String, String[]> parameters) {
+		URIBuilder redirect = null;
 		try {
-			URIBuilder redirect;
 			redirect = new URIBuilder(LOCATION);
 
 			if (parameters.containsKey(GET_PARAM_SUB)) {
@@ -182,8 +190,11 @@ public class LinkOnlySubscription extends AbstractModule {
 			redirect.addParameter(GET_PARAM_SUB, plat.getKey() + "_" + channelIdentifier);
 
 			return new FunctionResult(Status.OK, redirect);
-		} catch (URISyntaxException e) {
+		} catch (URISyntaxException | RateLimitException e) {
 			e.printStackTrace();
+			if (redirect != null) {
+				return new FunctionResult(Status.INTERNAL_ERROR, redirect);
+			}
 			throw new RuntimeException(e);
 		}
 	}

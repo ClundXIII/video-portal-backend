@@ -9,20 +9,20 @@ import org.json.JSONObject;
 import co.clund.video.db.DatabaseConnector;
 import co.clund.video.db.model.Platform;
 import co.clund.video.db.model.Video;
+import co.clund.video.exception.RateLimitException;
 import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlImg;
 import co.clund.video.html.HtmlStyleConstants;
 import co.clund.video.module.ViewChannel;
 import co.clund.video.module.WatchVideo;
-import co.clund.video.util.cache.Cache;
-import co.clund.video.util.cache.PermanentCache;
+import co.clund.video.util.cache.DynamicAsyncExpiringCache;
 
 public class PlatformVideo {
 
 	public static final String FULL_VIDEO_KEY = "fullVideoKey";
 
 	/// change this to access controlled expiring cache!
-	private static final Cache<PlatformVideo> videoCache = new PermanentCache<>("platform_video_general_cache");
+	private static final DynamicAsyncExpiringCache<PlatformVideo> videoCache = new DynamicAsyncExpiringCache<>("platform_video_general_cache", 24*60*60);
 
 	private final int videoId;
 	private final int userId;
@@ -124,7 +124,7 @@ public class PlatformVideo {
 		return additionalCssClasses;
 	}
 
-	private static PlatformVideo getCacheVideo(DatabaseConnector dbCon, AbstractPlatform abPlat, String identifier) {
+	private static PlatformVideo getCacheVideo(DatabaseConnector dbCon, AbstractPlatform abPlat, String identifier) throws RateLimitException {
 
 		if (videoCache.contains(identifier)) {
 			return videoCache.retrieve(identifier);
@@ -173,7 +173,7 @@ public class PlatformVideo {
 		return p.getKey() + "_" + videoIdentifier;
 	}
 
-	public static PlatformVideo getVideo(DatabaseConnector dbCon, String fullVideoKey) {
+	public static PlatformVideo getVideo(DatabaseConnector dbCon, String fullVideoKey) throws RateLimitException {
 		String platformKey = fullVideoKey.substring(0, fullVideoKey.indexOf("_"));
 
 		String videoIdent = fullVideoKey.substring(fullVideoKey.indexOf("_") + 1);
@@ -185,11 +185,11 @@ public class PlatformVideo {
 		return PlatformVideo.getCacheVideo(dbCon, abPlat, videoIdent);
 	}
 
-	public String render(DatabaseConnector dbCon) {
+	public String render(DatabaseConnector dbCon) throws RateLimitException {
 		return renderBuilder(dbCon).finish();
 	}
 
-	public HtmlGenericDiv renderBuilder(DatabaseConnector dbCon) {
+	public HtmlGenericDiv renderBuilder(DatabaseConnector dbCon) throws RateLimitException {
 		Platform platform = Platform.getPlatformById(dbCon, platformId);
 
 		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(platform);
@@ -198,7 +198,7 @@ public class PlatformVideo {
 	}
 
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, int platformId,
-			String channelIdentifier) {
+			String channelIdentifier) throws RateLimitException {
 
 		Platform p = Platform.getPlatformById(dbCon, platformId);
 
@@ -206,7 +206,7 @@ public class PlatformVideo {
 	}
 
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, Platform p,
-			String channelIdentifier) {
+			String channelIdentifier) throws RateLimitException {
 
 		AbstractPlatform ap = AbstractPlatform.getPlatformFromConfig(p);
 
@@ -249,7 +249,7 @@ public class PlatformVideo {
 	}
 
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, int platformId, String channelIdentifier,
-			int amount) {
+			int amount) throws RateLimitException {
 
 		Platform p = Platform.getPlatformById(dbCon, platformId);
 
@@ -258,7 +258,7 @@ public class PlatformVideo {
 		return ap.getLatestVideos(channelIdentifier, amount);
 	}
 
-	public HtmlGenericDiv renderPreview(DatabaseConnector dbCon) {
+	public HtmlGenericDiv renderPreview(DatabaseConnector dbCon) throws RateLimitException {
 		Platform p = Platform.getPlatformById(dbCon, platformId);
 
 		HtmlGenericDiv div = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_PREVIEW);
@@ -278,7 +278,7 @@ public class PlatformVideo {
 
 		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(p);
 
-		channelDiv.writeLink(ViewChannel.LOCATION + "?" + ViewChannel.GET_PARAM_CHANNEL_ID + "=" + p.getKey() + "_" + channelIdentifier, abPlat.getChannelName(channelIdentifier));
+		channelDiv.writeLink(ViewChannel.LOCATION + "?" + ViewChannel.GET_PARAM_CHANNEL_ID + "=" + p.getKey() + "_" + channelIdentifier, abPlat.getCachedChannelName(channelIdentifier));
 		div.write(channelDiv);
 
 		return div;
