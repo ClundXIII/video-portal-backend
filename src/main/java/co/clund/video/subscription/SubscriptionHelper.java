@@ -30,7 +30,7 @@ public class SubscriptionHelper {
 
 	private static final String TASK_NAME_VIDEOS_FROM_CHANNEL = "videosFromChannel";
 
-	protected static final DynamicAsyncExpiringCache<List<PlatformVideo>> videoCache = new DynamicAsyncExpiringCache<>(
+	public static final DynamicAsyncExpiringCache<List<PlatformVideo>> videoCache = new DynamicAsyncExpiringCache<>(
 			TASK_NAME_VIDEOS_FROM_CHANNEL, 3 * 60); // 3 Minutes
 
 	final DatabaseConnector dbCon;

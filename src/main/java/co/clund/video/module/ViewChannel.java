@@ -14,6 +14,7 @@ import co.clund.video.html.HtmlGenericDiv;
 import co.clund.video.html.HtmlPage;
 import co.clund.video.platform.AbstractPlatform;
 import co.clund.video.platform.PlatformVideo;
+import co.clund.video.subscription.SubscriptionHelper;
 
 public class ViewChannel extends AbstractModule {
 
@@ -58,15 +59,19 @@ public class ViewChannel extends AbstractModule {
 
 		div.newLine();
 
-		List<PlatformVideo> videos;
-		try {
-			videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
-		} catch (RateLimitException e) {
-			p.write(div);
+		List<PlatformVideo> videos = SubscriptionHelper.videoCache.retrieve(id);
 
-			p.writeText("error: ratelimit reached!");
-			logger.log(Level.WARNING, "error: ratelimit reached: " + e.getMessage());
-			return p.finish().getBytes();
+		if (videos == null) {
+			try {
+				videos = PlatformVideo.getLatestVideos(dbCon, plat, channelIdentifier);
+				SubscriptionHelper.videoCache.put(id, videos);
+			} catch (RateLimitException e) {
+				p.write(div);
+
+				p.writeText("error: ratelimit reached!");
+				logger.log(Level.WARNING, "error: ratelimit reached: " + e.getMessage());
+				return p.finish().getBytes();
+			}
 		}
 
 		for (PlatformVideo v : videos) {
