@@ -149,7 +149,7 @@ public class HtmlPage implements Builder {
 	public String finish() {
 		sb.append(partsContent.get(5)); // Before Footer
 
-		sb.append("2019 (c) Simon Michalke, powered by <a href=\"https://github.com/ClundXIII/video-portal-backend\">Video Portal</a>");
+		sb.append("2019 (c) Connor Hill and Simon Michalke, powered by <a href=\"https://bluedrake42.com\">Bluedrake42 Ltd</a>");
 		sb.append(partsContent.get(6)); // After Footer
 		return sb.toString();
 	}
