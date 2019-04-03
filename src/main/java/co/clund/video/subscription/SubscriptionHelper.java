@@ -57,9 +57,6 @@ public class SubscriptionHelper {
 	}
 
 	public List<HtmlGenericDiv> renderOrderedSubscribedVideosFromList(List<String> channelKeys) throws Exception {
-
-		Map<String, HtmlGenericDiv> subMap = new HashMap<>();
-
 		List<Future<List<PlatformVideo>>> videosFutureList = new ArrayList<>();
 
 		List<List<PlatformVideo>> cachedVideosList = new ArrayList<>();
@@ -80,49 +77,7 @@ public class SubscriptionHelper {
 			this.setupFutureTask(channelIdentifier, plat, videosFutureList);
 		}
 
-		return assembleOrderedVideoDivList(subMap, videosFutureList, cachedVideosList);
-	}
-
-	private LinkedList<HtmlGenericDiv> assembleOrderedVideoDivList(Map<String, HtmlGenericDiv> subMap,
-			List<Future<List<PlatformVideo>>> videosFutureList, List<List<PlatformVideo>> cachedVideosList)
-			throws RateLimitException, InterruptedException, ExecutionException {
-		for (List<PlatformVideo> videos : cachedVideosList) {
-			for (PlatformVideo v : videos) {
-				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
-
-				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
-				if (dbVideo == null) {
-					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
-							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
-							v.getThumbnailLink(), true);
-				}
-			}
-		}
-
-		for (Future<List<PlatformVideo>> f : videosFutureList) {
-
-			List<PlatformVideo> videos = f.get();
-
-			for (PlatformVideo v : videos) {
-				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
-
-				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
-				if (dbVideo == null) {
-					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
-							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
-							v.getThumbnailLink(), true);
-				}
-			}
-		}
-
-		LinkedList<HtmlGenericDiv> retList = new LinkedList<>();
-
-		SortedSet<String> keys = new TreeSet<>(subMap.keySet());
-
-		for (String key : keys) {
-			retList.addFirst(subMap.get(key));
-		}
-		return retList;
+		return assembleOrderedVideoDivList(new HashMap<>(), videosFutureList, cachedVideosList);
 	}
 
 	public List<HtmlGenericDiv> renderOrderedSubscribedVideosList(User thisUser) throws Exception {
@@ -190,6 +145,48 @@ public class SubscriptionHelper {
 				.insertTask(TASK_NAME_VIDEOS_FROM_CHANNEL + channelIdentifier, futureTask);
 
 		videosFutureList.add(future);
+	}
+
+	private LinkedList<HtmlGenericDiv> assembleOrderedVideoDivList(Map<String, HtmlGenericDiv> subMap,
+			List<Future<List<PlatformVideo>>> videosFutureList, List<List<PlatformVideo>> cachedVideosList)
+			throws RateLimitException, InterruptedException, ExecutionException {
+		for (List<PlatformVideo> videos : cachedVideosList) {
+			for (PlatformVideo v : videos) {
+				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
+
+				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
+				if (dbVideo == null) {
+					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
+							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
+							v.getThumbnailLink(), true);
+				}
+			}
+		}
+
+		for (Future<List<PlatformVideo>> f : videosFutureList) {
+
+			List<PlatformVideo> videos = f.get();
+
+			for (PlatformVideo v : videos) {
+				subMap.put(Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.renderPreview(dbCon));
+
+				Video dbVideo = Video.getVideoByPlatformIdIdentifier(dbCon, v.getPlatformId(), v.getVideoIdentifier());
+				if (dbVideo == null) {
+					Video.addNewVideo(dbCon, -1, -1, v.getChannelIdentifier(), v.getTitle(), v.getPlatformId(),
+							v.getVideoIdentifier(), Video.UPLOAD_DATE_FORMAT.format(v.getDate()), v.getDescription(),
+							v.getThumbnailLink(), true);
+				}
+			}
+		}
+
+		LinkedList<HtmlGenericDiv> retList = new LinkedList<>();
+
+		SortedSet<String> keys = new TreeSet<>(subMap.keySet());
+
+		for (String key : keys) {
+			retList.addFirst(subMap.get(key));
+		}
+		return retList;
 	}
 
 	public List<HtmlGenericDiv> renderLiveStreams(User thisUser) {

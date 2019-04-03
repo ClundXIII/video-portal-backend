@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.14.v20181114</version>
+			<version>9.4.15.v20190215</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.197</version>
+			<version>1.4.199</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.11.493</version>
+			<version>1.11.524</version>
 		</dependency>
 	</dependencies>
 	<profiles>

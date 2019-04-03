@@ -290,8 +290,14 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public String getOAuth2ConnectRedirect(DatabaseConnector dbCon) {
-		URIBuilder builder;
+	public long getClientCredentialsExpirationTime() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon) {
+		URIBuilder builder = null;
 		try {
 			builder = new URIBuilder(OAUTH2_ENTRY);
 
@@ -305,7 +311,44 @@ public class YoutubePlatform extends AbstractPlatform {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		return builder.toString();
+		return builder;
 	}
 
+	@Override
+	public URIBuilder getClientCredentialsUploadRequestBuilder(DatabaseConnector dbCon) {
+		URIBuilder builder = null;
+		try {
+			builder = new URIBuilder(OAUTH2_ENTRY);
+
+			builder.addParameter("client_id", platform.getConfig().getString("oauth2_client_id"));
+			builder.addParameter("redirect_uri", dbCon.getListener().getSiteUrl() + "/oauth2.callback");
+			builder.addParameter("scope", "https://www.googleapis.com/auth/youtube.upload");
+			builder.addParameter("access_type", "offline");
+			builder.addParameter("include_granted_scopes", "true");
+
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		return builder;
+	}
+
+	@Override
+	public String getClientCredentialsFromCallback(Map<String, String> callBackData) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String renewClientCredentials(String clientCredentials) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void revokeClientCredentials(String clientCredentials) {
+		// TODO Auto-generated method stub
+		
+	}
 }

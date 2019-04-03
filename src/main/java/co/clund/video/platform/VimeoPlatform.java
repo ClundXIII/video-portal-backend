@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -221,9 +222,38 @@ public class VimeoPlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public String getOAuth2ConnectRedirect(DatabaseConnector dbCon) {
+	public long getClientCredentialsExpirationTime() {
 		// TODO Auto-generated method stub
-		/// TODO TO BE DONE
+		return 0;
+	}
+
+	@Override
+	public String getClientCredentialsFromCallback(Map<String, String> callBackData) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String renewClientCredentials(String clientCredentials) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void revokeClientCredentials(String clientCredentials) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public URIBuilder getClientCredentialsUploadRequestBuilder(DatabaseConnector dbCon) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

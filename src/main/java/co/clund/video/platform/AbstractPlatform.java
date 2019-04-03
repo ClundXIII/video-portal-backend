@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.reflections.Reflections;
 
 import co.clund.video.db.DatabaseConnector;
@@ -113,8 +114,6 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 	public abstract List<Pattern> getSubscriptionRegExps();
 
-	public abstract String getOAuth2ConnectRedirect(DatabaseConnector dbCon);
-
 	// functions that do not need caching:
 
 	public abstract String getOriginalChannelLink(String channelIdentifier);
@@ -202,4 +201,21 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 		return value;
 	}
 
+	// Management functions
+	
+	/**
+	 * @return how long until client credentials need to be renewed (in seconds)
+	 */
+	public abstract long getClientCredentialsExpirationTime();
+
+	public abstract URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon);
+	public abstract URIBuilder getClientCredentialsUploadRequestBuilder(DatabaseConnector dbCon);
+
+	public abstract String getClientCredentialsFromCallback(Map<String, String> callBackData);
+
+	public abstract String renewClientCredentials(String clientCredentials);
+
+	public abstract void revokeClientCredentials(String clientCredentials);
+	
+	
 }
