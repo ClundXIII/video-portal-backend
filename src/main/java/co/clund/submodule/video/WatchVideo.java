@@ -19,7 +19,7 @@ import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.submodule.video.dbmodel.Video;
 import co.clund.submodule.video.platform.AbstractPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
-import co.clund.subscription.SubscriptionHelper;
+import co.clund.submodule.video.subscription.SubscriptionHelper;
 import co.clund.util.cache.Cache;
 import co.clund.util.cache.PermanentCache;
 

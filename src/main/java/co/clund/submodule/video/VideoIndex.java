@@ -17,7 +17,7 @@ import co.clund.html.HtmlStyleConstants;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
 import co.clund.module.Profile;
-import co.clund.subscription.SubscriptionHelper;
+import co.clund.submodule.video.subscription.SubscriptionHelper;
 
 public class VideoIndex extends AbstractModule {
 

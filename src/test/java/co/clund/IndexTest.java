@@ -1,4 +1,4 @@
-package co.clund.video;
+package co.clund;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,12 +8,12 @@ import org.json.JSONObject;
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.model.User;
+import co.clund.module.Index;
 import co.clund.module.Video;
-import co.clund.submodule.video.VideoIndex;
-import co.clund.submodule.video.dbmodel.ExternalSubscription;
 import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
+import co.clund.video.HttpTest;
 import junit.framework.TestCase;
 
 public class IndexTest extends TestCase implements HttpTest {
@@ -75,10 +75,8 @@ public class IndexTest extends TestCase implements HttpTest {
 
 		User.addNewLocalUser(l.getDbCon(), "testUser1", "asdf1234", "test@clund.co", false);
 
-		ExternalSubscription.addNewExternalSubscription(submoduleConnector, 1, 1, "UCJs1mfRk0orBF9twGXaZA2w");
-
 		httpRequestAsUser("testUser1", "asdf1234", baseUrl,
-				baseUrl + "/" + Video.VIDEO_LOCATION + "/" + VideoIndex.INDEX_LOCATION);
+				baseUrl + "/" + Index.INDEX_LOCATION);
 
 	}
 

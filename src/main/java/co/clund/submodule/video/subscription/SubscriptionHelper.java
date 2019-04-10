@@ -1,4 +1,4 @@
-package co.clund.subscription;
+package co.clund.submodule.video.subscription;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class SubscriptionHelper {
 	public SubscriptionHelper(DatabaseConnector dbCon, co.clund.module.Video videoModule) {
 		this.dbCon = dbCon;
 
-		this.videoModule = videoModule;//(co.clund.module.Video) dbCon.getListener().getReqHandler().moduleMap.get(co.clund.module.Video.VIDEO_LOCATION);
+		this.videoModule = videoModule;
 	}
 
 	public List<HtmlGenericDiv> renderOrderedNewestVideosList() {

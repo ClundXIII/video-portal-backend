@@ -1,4 +1,4 @@
-package co.clund.module;
+package co.clund.submodule.content;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,13 +7,15 @@ import java.util.function.BiFunction;
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
 import co.clund.html.HtmlPage;
+import co.clund.module.AbstractModule;
+import co.clund.module.FunctionResult;
 
-public class Downloads extends AbstractModule {
+public class ContentIndex extends AbstractModule {
 
-	public static String DOWNLOADS_LOCATION = "downloads";
-	
-	public Downloads(@SuppressWarnings("unused") AbstractModule parent, DatabaseConnector dbCon) {
-		super("", DOWNLOADS_LOCATION, dbCon.getSubmoduleConnector(DOWNLOADS_LOCATION));
+	public static final String INDEX_LOCATION = "index";
+
+	public ContentIndex(AbstractModule parent, DatabaseConnector dbCon) {
+		super(parent.getModulePath(), INDEX_LOCATION, dbCon);
 	}
 
 	@Override

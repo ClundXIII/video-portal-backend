@@ -1,4 +1,4 @@
-package co.clund.module;
+package co.clund.submodule.forum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,20 +7,22 @@ import java.util.function.BiFunction;
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
 import co.clund.html.HtmlPage;
+import co.clund.module.AbstractModule;
+import co.clund.module.FunctionResult;
 
-public class Downloads extends AbstractModule {
+public class ForumIndex extends AbstractModule {
 
-	public static String DOWNLOADS_LOCATION = "downloads";
-	
-	public Downloads(@SuppressWarnings("unused") AbstractModule parent, DatabaseConnector dbCon) {
-		super("", DOWNLOADS_LOCATION, dbCon.getSubmoduleConnector(DOWNLOADS_LOCATION));
+	public static final String INDEX_LOCATION = "index";
+
+	public ForumIndex(AbstractModule parent, DatabaseConnector dbCon) {
+		super(parent.getModulePath(), INDEX_LOCATION, dbCon);
 	}
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 		HtmlPage p = new HtmlPage("Video Portal", null, null, s);
 
-		p.writeH1("Content");
+		p.writeH1("Forum");
 		return p.finish().getBytes();
 	}
 

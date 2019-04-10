@@ -87,7 +87,9 @@ public class App {
 			case "generate-tables": {
 				JSONObject config = new JSONObject(FileUtil.getFileContentAsString(args[1]));
 
-				DatabaseConnector dbCon = new DatabaseConnector(null,
+				MainHttpListener l = new MainHttpListener(config);
+
+				DatabaseConnector dbCon = new DatabaseConnector(l,
 						config.getJSONObject(MainHttpListener.JSON_VARNAME_DB));
 
 				DatabaseConnector.initializeDatabase(dbCon);
