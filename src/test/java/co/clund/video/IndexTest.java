@@ -5,13 +5,15 @@ import java.util.logging.Logger;
 
 import org.json.JSONObject;
 
-import co.clund.video.MainHttpListener;
-import co.clund.video.db.DatabaseConnector;
-import co.clund.video.db.model.ExternalSubscription;
-import co.clund.video.db.model.Platform;
-import co.clund.video.db.model.User;
-import co.clund.video.util.ResourceUtil;
-import co.clund.video.util.log.LoggingUtil;
+import co.clund.MainHttpListener;
+import co.clund.db.DatabaseConnector;
+import co.clund.db.model.ExternalSubscription;
+import co.clund.db.model.Platform;
+import co.clund.db.model.User;
+import co.clund.module.Video;
+import co.clund.submodule.video.VideoIndex;
+import co.clund.util.ResourceUtil;
+import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
 
 public class IndexTest extends TestCase implements HttpTest {
@@ -67,11 +69,13 @@ public class IndexTest extends TestCase implements HttpTest {
 
 		startHttpListener(l);
 
+		Platform.populateTestPlatforms(l.getDbCon(), getTestCredentials().getJSONObject("credentials"));
+		
 		User.addNewLocalUser(l.getDbCon(), "testUser1", "asdf1234", "test@clai.co", false);
 
 		ExternalSubscription.addNewExternalSubscription(l.getDbCon(), 1, 1, "UCJs1mfRk0orBF9twGXaZA2w");
 
-		httpRequestAsUser("testUser1", "asdf1234", baseUrl, baseUrl + "/index");
+		httpRequestAsUser("testUser1", "asdf1234", baseUrl, baseUrl + "/" + Video.VIDEO_LOCATION + "/" + VideoIndex.INDEX_LOCATION);
 
 	}
 

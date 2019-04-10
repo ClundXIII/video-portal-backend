@@ -5,13 +5,13 @@ import java.util.logging.Logger;
 
 import org.json.JSONObject;
 
-import co.clund.video.MainHttpListener;
-import co.clund.video.db.DatabaseConnector;
-import co.clund.video.db.model.Platform;
-import co.clund.video.db.model.User;
-import co.clund.video.module.Api;
-import co.clund.video.util.ResourceUtil;
-import co.clund.video.util.log.LoggingUtil;
+import co.clund.MainHttpListener;
+import co.clund.db.DatabaseConnector;
+import co.clund.db.model.Platform;
+import co.clund.db.model.User;
+import co.clund.module.Api;
+import co.clund.util.ResourceUtil;
+import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
 
 public class ApiTest extends TestCase implements HttpTest {

@@ -2,16 +2,17 @@ package co.clund.video;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import co.clund.video.db.DatabaseConnector;
-import co.clund.video.module.AbstractModule;
-import co.clund.video.module.ModuleUtil;
-import co.clund.video.util.log.LoggingUtil;
+import co.clund.db.DatabaseConnector;
+import co.clund.module.AbstractModule;
+import co.clund.module.ModuleUtil;
+import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
 
 public class ModuleUtilTest extends TestCase {
@@ -20,43 +21,48 @@ public class ModuleUtilTest extends TestCase {
 		super(name);
 	}
 
-	public void testLoadingFunctions() {
+	public void testAllFunctionsAndModules() {
 		Logger logger = LoggingUtil.getDefaultLogger();
 
 		logger.log(Level.INFO, "running test " + getName());
 
-		logger.log(Level.INFO, "getting Module List:");
+		logger.log(Level.INFO, "getting Module and Function List:");
 
-		Set<String> modules = ModuleUtil.getModules();
-		for (String s : modules) {
-			logger.log(Level.INFO, "Module: " + s);
-		}
+		Set<Class<? extends AbstractModule>> allClasses = ModuleUtil.getModuleClasses();
 
-		logger.log(Level.INFO, "getting Function List:");
-
-		List<String> functions = ModuleUtil.getFunctionList();
-		for (String s : functions) {
-			logger.log(Level.INFO, "Function: " + s);
-		}
+		printSuperModulePath(logger, allClasses);
 	}
 
-	public void testGetModuleClasses() {
-		Logger logger = LoggingUtil.getDefaultLogger();
-
-		logger.log(Level.INFO, "running test " + getName());
-
-		Set<Class<? extends AbstractModule>> allModules = ModuleUtil.getModuleClasses();
-
-		for (Class<? extends AbstractModule> m : allModules) {
-			if (!Modifier.isAbstract(m.getModifiers())) {
+	private static void printSuperModulePath(Logger logger, Set<Class<? extends AbstractModule>> allClasses) {
+		for (Class<? extends AbstractModule> c : allClasses) {
+			if (!Modifier.isAbstract(c.getModifiers())) {
 				Constructor<? extends AbstractModule> cons;
 				try {
-					cons = m.getConstructor(DatabaseConnector.class);
-					AbstractModule module = cons.newInstance((DatabaseConnector) null);
-					logger.log(Level.INFO, "Module: " + module.getModuleName());
+					cons = c.getConstructor(AbstractModule.class, DatabaseConnector.class);
+					AbstractModule m = cons.newInstance(null, null);
+					logger.log(Level.INFO, "Module: " + m.getModulePath());
+					for (String f : m.getFunctionList()) {
+						logger.log(Level.INFO, "Function: " + m.getModulePath() + "." + f);
+					}
+					printModulePath(logger, m.loadSubModules());
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
+			}
+		}
+	}
+
+	private static void printModulePath(Logger logger, Map<String, AbstractModule> subModules) {
+		for (Entry<String, AbstractModule> entry : subModules.entrySet()) {
+			try {
+				AbstractModule m = entry.getValue();
+				logger.log(Level.INFO, "Module: " + m.getModulePath());
+				for (String f : m.getFunctionList()) {
+					logger.log(Level.INFO, "Function: " + m.getModulePath() + "." + f);
+				}
+				printModulePath(logger, m.loadSubModules());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}

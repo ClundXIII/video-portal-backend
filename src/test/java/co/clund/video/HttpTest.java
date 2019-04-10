@@ -12,11 +12,11 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import co.clund.video.MainHttpListener;
-import co.clund.video.module.FunctionResult;
-import co.clund.video.util.CookieManager;
-import co.clund.video.util.ResourceUtil;
-import co.clund.video.util.log.LoggingUtil;
+import co.clund.MainHttpListener;
+import co.clund.module.FunctionResult;
+import co.clund.util.CookieManager;
+import co.clund.util.ResourceUtil;
+import co.clund.util.log.LoggingUtil;
 
 public interface HttpTest {
 
@@ -31,6 +31,10 @@ public interface HttpTest {
 		jData.put("db", new JSONObject("{\"path\":\"jdbc:h2:mem:test" + (int) (Math.random() * 1000.f)
 				+ ";DB_CLOSE_DELAY=-1;database_to_upper=false\",\"username\":\"\",\"password\":\"\"}"));
 		return jData;
+	}
+	
+	default JSONObject getTestCredentials() {
+		return ResourceUtil.loadJSONResource("/credentials.json");
 	}
 
 	default String getIpAndPort(JSONObject jData) {

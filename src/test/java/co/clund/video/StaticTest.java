@@ -5,9 +5,9 @@ import java.util.logging.Logger;
 
 import org.json.JSONObject;
 
-import co.clund.video.MainHttpListener;
-import co.clund.video.util.ResourceUtil;
-import co.clund.video.util.log.LoggingUtil;
+import co.clund.MainHttpListener;
+import co.clund.util.ResourceUtil;
+import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
 
 public class StaticTest extends TestCase implements HttpTest {

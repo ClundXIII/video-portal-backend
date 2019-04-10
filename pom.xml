@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>co.clund.video</groupId>
+	<groupId>co.clund</groupId>
 	<artifactId>video-portal-backend</artifactId>
 	<packaging>jar</packaging>
 	<version>0.9-PRERELEASE</version>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.7</version>
+			<version>4.5.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.11.524</version>
+			<version>1.11.534</version>
 		</dependency>
 	</dependencies>
 	<profiles>
@@ -108,7 +108,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>co.clund.video.App</mainClass>
+							<mainClass>co.clund.App</mainClass>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
 						</manifest>
