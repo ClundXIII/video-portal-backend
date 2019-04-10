@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,8 @@ import org.json.JSONObject;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
-import co.clund.platform.AbstractPlatform;
+import co.clund.db.model.AbstractDbTable;
+import co.clund.submodule.video.platform.AbstractPlatform;
 
 public class Platform extends AbstractDbTable {
 

@@ -10,9 +10,9 @@ import org.apache.http.client.utils.URIBuilder;
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.model.AbstractDbTable;
-import co.clund.db.model.Platform;
 import co.clund.module.FunctionResult.Status;
-import co.clund.platform.AbstractPlatform;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.platform.AbstractPlatform;
 
 public class OAuth2 extends AbstractModule {
 

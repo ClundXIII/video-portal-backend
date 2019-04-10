@@ -1,4 +1,4 @@
-package co.clund.platform;
+package co.clund.submodule.video.platform;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,10 +15,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlStyleConstants;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.HttpRequestUtil;
 
 public class YoutubePlatform extends AbstractPlatform {

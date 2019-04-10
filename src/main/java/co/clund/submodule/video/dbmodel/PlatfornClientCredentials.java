@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 public class PlatfornClientCredentials {
 

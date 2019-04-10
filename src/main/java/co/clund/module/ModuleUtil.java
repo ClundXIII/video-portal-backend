@@ -46,6 +46,10 @@ public class ModuleUtil {
 
 	protected static Set<AbstractModule> createSubModuleClasses(AbstractModule parentModule, String packagePath,
 			DatabaseConnector dbCon) {
+		if (dbCon == null) {
+			throw new RuntimeException("dbCon is null");
+		}
+
 		Set<Class<? extends AbstractModule>> classes = loadModuleClassesFromPackage(packagePath);
 
 		Set<AbstractModule> retSet = new HashSet<>();
@@ -62,6 +66,7 @@ public class ModuleUtil {
 							"Adding module \"" + m.getModuleName() + "\" from class \"" + m.toString() + "\"");
 					retSet.add(m);
 				} catch (Exception e) {
+					logger.log(Level.SEVERE, "error while instanciating module: " + c.getName());
 					throw new RuntimeException(e);
 				}
 			}

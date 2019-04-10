@@ -28,7 +28,7 @@ public class VideoIndex extends AbstractModule {
 	public VideoIndex(AbstractModule parent, DatabaseConnector dbCon) {
 		super(parent.getModulePath(), INDEX_LOCATION, dbCon);
 
-		subscriptionHelper = new SubscriptionHelper(dbCon);
+		subscriptionHelper = new SubscriptionHelper(dbCon, (co.clund.module.Video) parent);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class VideoIndex extends AbstractModule {
 
 		User thisUser = s.getThisUser();
 		if (thisUser == null) {
-			p.writeLink(Profile.LOCATION, "Log in");
+			p.writeLink("/" + Profile.LOCATION, "Log in");
 			p.writeText(" to see your subscriptions");
 			p.newLine();
 			p.writeText("Or use the URL based ");

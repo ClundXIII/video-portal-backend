@@ -37,7 +37,7 @@ public abstract class AbstractDbTable {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("CREATE TABLE " + t.getTableName() + " ( ");
+		sb.append("CREATE TABLE " + dbCon.dbPrefix + t.getTableName() + " ( ");
 
 		for (Entry<String, DbValueType> e : t.getColumns().entrySet()) {
 			switch (e.getValue()) {
@@ -73,7 +73,7 @@ public abstract class AbstractDbTable {
 		dbCon.executeUpdatePreparedQuery(new ArrayList<>(), sb.toString());
 
 		dbCon.executeUpdatePreparedQuery(new ArrayList<>(),
-				"ALTER TABLE " + t.getTableName() + " MODIFY COLUMN id INT auto_increment");
+				"ALTER TABLE " + dbCon.dbPrefix + t.getTableName() + " MODIFY COLUMN id INT auto_increment");
 
 	}
 

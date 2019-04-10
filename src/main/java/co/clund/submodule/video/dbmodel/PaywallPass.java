@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
+import co.clund.db.model.AbstractDbTable;
 
 public class PaywallPass extends AbstractDbTable {
 

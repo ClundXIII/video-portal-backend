@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
+import co.clund.db.model.AbstractDbTable;
 
 public class ClientCommunity extends AbstractDbTable {
 

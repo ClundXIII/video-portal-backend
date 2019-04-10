@@ -1,4 +1,4 @@
-package co.clund.platform;
+package co.clund.submodule.video.platform;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.html.HtmlGenericDiv;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.HttpRequestUtil;
 
 public class VimeoPlatform extends AbstractPlatform {

@@ -8,14 +8,14 @@ import java.util.logging.Level;
 
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlPage;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
-import co.clund.platform.AbstractPlatform;
-import co.clund.platform.PlatformVideo;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.subscription.SubscriptionHelper;
 
 public class ViewChannel extends AbstractModule {

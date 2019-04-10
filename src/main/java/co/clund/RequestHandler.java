@@ -37,7 +37,7 @@ public class RequestHandler extends AbstractHandler {
 
 	private final DatabaseConnector dbCon;
 
-	private final Map<String, AbstractModule> moduleMap = new HashMap<>();
+	public final Map<String, AbstractModule> moduleMap = new HashMap<>();
 
 	private class StaticContent {
 		public StaticContent(byte[] content, String mimeType) {

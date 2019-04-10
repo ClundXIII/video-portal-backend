@@ -5,13 +5,13 @@ import java.util.logging.Level;
 
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.ClientCommunityChannelAccess;
-import co.clund.db.model.ClientCommunityToken;
 import co.clund.exception.RateLimitException;
 import co.clund.html.Builder;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.module.FunctionResult;
-import co.clund.platform.PlatformVideo;
+import co.clund.submodule.video.dbmodel.ClientCommunityChannelAccess;
+import co.clund.submodule.video.dbmodel.ClientCommunityToken;
+import co.clund.submodule.video.platform.PlatformVideo;
 
 public class Video extends AbstractApiFunction {
 

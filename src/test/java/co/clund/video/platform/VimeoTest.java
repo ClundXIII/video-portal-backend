@@ -8,11 +8,12 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.exception.RateLimitException;
-import co.clund.platform.AbstractPlatform;
-import co.clund.platform.PlatformVideo;
-import co.clund.platform.VimeoPlatform;
+import co.clund.module.Video;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.platform.PlatformVideo;
+import co.clund.submodule.video.platform.VimeoPlatform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import co.clund.video.HttpTest;
@@ -35,15 +36,16 @@ public class VimeoTest extends TestCase implements HttpTest {
 
 		DatabaseConnector.initializeDatabase(l.getDbCon());
 
-		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json")).getJSONObject("credentials");
+		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
+				.getJSONObject("credentials");
 
-		Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
+		Platform.populateTestPlatforms(submoduleConnector, credentialData);
 
 		final JSONObject vimeoCredentials = credentialData.getJSONObject("vimeo");
 
 		Platform plat = new Platform(1, "test_vi", "Test Vimeo", "vimeo",
-				"{\"client_id\":\"" + vimeoCredentials.getString("client_id")
-						+ "\",\"client_secret\":\""
+				"{\"client_id\":\"" + vimeoCredentials.getString("client_id") + "\",\"client_secret\":\""
 						+ vimeoCredentials.getString("client_secret") + "\"}");
 
 		AbstractPlatform yP = new VimeoPlatform(plat);
@@ -61,8 +63,10 @@ public class VimeoTest extends TestCase implements HttpTest {
 		logger.log(Level.INFO, "Video link: " + yP.getOriginalVideoLink(platVid));
 		logger.log(Level.INFO, "PlatformType: " + yP.getPlatformTypeName());
 		logger.log(Level.INFO, "User name: " + yP.getCachedUserName(channelId));
-		logger.log(Level.INFO, "Latest Videos count: " + PlatformVideo.getLatestVideos(l.getDbCon(), yP, channelId).size());
-		logger.log(Level.INFO, "Latest 13 Videos count: " + PlatformVideo.getLatestVideos(l.getDbCon(), yP, channelId, 13).size());
+		logger.log(Level.INFO,
+				"Latest Videos count: " + PlatformVideo.getLatestVideos(submoduleConnector, yP, channelId).size());
+		logger.log(Level.INFO, "Latest 13 Videos count: "
+				+ PlatformVideo.getLatestVideos(submoduleConnector, yP, channelId, 13).size());
 		for (Pattern s : yP.getSubscriptionRegExps()) {
 			logger.log(Level.INFO, "Pattern for platform: " + s.pattern());
 		}

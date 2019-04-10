@@ -8,7 +8,6 @@ import java.util.function.BiFunction;
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.model.AbstractDbTable;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
 import co.clund.html.HtmlForm;
 import co.clund.html.HtmlPage;
@@ -18,6 +17,7 @@ import co.clund.html.HtmlForm.Method;
 import co.clund.html.HtmlTable.HtmlTableRow;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
+import co.clund.submodule.video.dbmodel.Platform;
 
 public class EditPlatform extends AbstractModule {
 

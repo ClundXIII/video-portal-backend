@@ -15,16 +15,21 @@ public class DbUtil {
 
 	private final static Logger logger = LoggingUtil.getDefaultLogger();
 
-	public static Set<Class<? extends AbstractDbTable>> getTableClasses() {
+	public static Set<Class<? extends AbstractDbTable>> getTableClasses(String packagePath) {
 
-		Reflections reflections = new Reflections("co.clund.db.model");
+		Reflections reflections = new Reflections(packagePath);
 
 		return reflections.getSubTypesOf(AbstractDbTable.class);
 	}
 
-	public static List<AbstractDbTable> getTableSet() {
+	public static List<AbstractDbTable> getCoreTableSet() {
 
-		Set<Class<? extends AbstractDbTable>> allClasses = getTableClasses();
+		return getTableSet("co.clund.db.model");
+	}
+
+	public static List<AbstractDbTable> getTableSet(String packagePath) {
+
+		Set<Class<? extends AbstractDbTable>> allClasses = getTableClasses(packagePath);
 
 		List<AbstractDbTable> retList = new ArrayList<>();
 
@@ -40,11 +45,19 @@ public class DbUtil {
 		}
 
 		return retList;
-
 	}
 
 	public static void createAllTables(DatabaseConnector dbCon) {
-		List<AbstractDbTable> tables = DbUtil.getTableSet();
+		List<AbstractDbTable> tables = DbUtil.getCoreTableSet();
+
+		for (AbstractDbTable t : tables) {
+			logger.log(Level.INFO, "creating table " + t.getTableName());
+			AbstractDbTable.createTable(dbCon, t);
+		}
+	}
+
+	public static void createAllTablesForModule(DatabaseConnector dbCon, String packagePath) {
+		List<AbstractDbTable> tables = DbUtil.getTableSet(packagePath);
 
 		for (AbstractDbTable t : tables) {
 			logger.log(Level.INFO, "creating table " + t.getTableName());

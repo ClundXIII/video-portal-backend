@@ -19,8 +19,7 @@ import java.util.logging.Level;
 import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
-import co.clund.db.model.Platform;
-import co.clund.util.RatelimitAbidingThreadPoolExecutor;
+import co.clund.module.AbstractModule;
 import co.clund.util.log.LoggingUtil;
 
 public class DatabaseConnector {
@@ -28,6 +27,7 @@ public class DatabaseConnector {
 	private final String dbPath;
 	private final String dbUser;
 	private final String dbPassword;
+	public final String dbPrefix;
 
 	private final MainHttpListener listener;
 
@@ -35,37 +35,45 @@ public class DatabaseConnector {
 
 	public final String uniqueKey;
 
-	private final Map<Integer, RatelimitAbidingThreadPoolExecutor> threadExecutorMap = new HashMap<>();
-
 	public DatabaseConnector(MainHttpListener listener, JSONObject dbConfig) {
 		dbPath = dbConfig.getString("path");
 		dbUser = dbConfig.getString("username");
 		dbPassword = dbConfig.getString("password");
+
+		if (dbConfig.has("dbPrefix")) {
+			dbPrefix = dbConfig.getString("dbPrefix") + "_";
+		} else {
+			dbPrefix = "";
+		}
 
 		this.listener = listener;
 
 		uniqueKey = dbUser + "+" + dbPath + "_" + (int) (Math.random() * 100.f);
 	}
 
-	public RatelimitAbidingThreadPoolExecutor getThreadExecutorMap(int platformId) {
+	private DatabaseConnector(MainHttpListener listener, String dbPath, String dbUser, String dbPassword,
+			String prefix) {
+		this.dbPath = dbPath;
+		this.dbUser = dbUser;
+		this.dbPassword = dbPassword;
 
-		if (!threadExecutorMap.containsKey(new Integer(platformId))) {
-			int ratelimit = 100;
+		dbPrefix = prefix;
 
-			try {
-				Platform plat = Platform.getPlatformById(this, platformId);
+		this.listener = listener;
 
-				ratelimit = plat.getConfig().getInt(Platform.PLATFORM_JSON_CONFIG_RATELIMIT);
-			} catch (Exception e) {
-				logger.log(Level.WARNING, "no ratelimit set for platform with id " + platformId
-						+ ", defaulting to 100!\n" + e.getMessage());
-				e.printStackTrace();
-			}
+		uniqueKey = dbUser + "+" + dbPath + "_" + (int) (Math.random() * 100.f);
+	}
 
-			threadExecutorMap.put(new Integer(platformId), new RatelimitAbidingThreadPoolExecutor(ratelimit));
+	public DatabaseConnector getSubmoduleConnector(String subModuleName) {
+		String totalPrefix = "";
+
+		if (!dbPrefix.equals("")) {
+			totalPrefix += dbPrefix + "_";
 		}
 
-		return threadExecutorMap.get(new Integer(platformId));
+		totalPrefix += subModuleName + "_";
+
+		return new DatabaseConnector(listener, dbPath, dbUser, dbPassword, totalPrefix);
 	}
 
 	private Connection openConnection() throws SQLException {
@@ -90,7 +98,7 @@ public class DatabaseConnector {
 	public void insert(String dbName, List<String> columns, List<DbValue> values) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("INSERT INTO " + dbName + " (");
+		sb.append("INSERT INTO " + dbPrefix + dbName + " (");
 
 		sb.append(generateCommaSeperatedList(columns));
 
@@ -130,7 +138,7 @@ public class DatabaseConnector {
 			Map<String, DbValueType> returnTypes, String append) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("SELECT * FROM " + dbName + " WHERE ");
+		sb.append("SELECT * FROM " + dbPrefix + dbName + " WHERE ");
 
 		for (String c : columns) {
 			sb.append(c + " = ? AND ");
@@ -269,7 +277,7 @@ public class DatabaseConnector {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("UPDATE " + tableName + " SET ");
+		sb.append("UPDATE " + dbPrefix + tableName + " SET ");
 
 		StringJoiner sj = new StringJoiner(" , ");
 
@@ -314,7 +322,7 @@ public class DatabaseConnector {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("DELETE FROM " + tableName + " WHERE ");
+		sb.append("DELETE FROM " + dbPrefix + tableName + " WHERE ");
 
 		for (String c : selectorColumns) {
 			sb.append(c + " = ? AND ");
@@ -342,5 +350,9 @@ public class DatabaseConnector {
 
 	public static void initializeDatabase(DatabaseConnector dbCon) {
 		DbUtil.createAllTables(dbCon);
+
+		for (Entry<String, AbstractModule> e : dbCon.getListener().getReqHandler().moduleMap.entrySet() ) {
+			DbUtil.createAllTablesForModule(dbCon.getSubmoduleConnector(e.getKey()), "co.clund.submodule." + e.getKey());
+		}
 	}
 }

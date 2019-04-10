@@ -7,9 +7,10 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
 import co.clund.module.FunctionResult;
+import co.clund.module.Video;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
@@ -32,9 +33,11 @@ public class ProfileTest extends TestCase implements HttpTest {
 
 		DatabaseConnector.initializeDatabase(l.getDbCon());
 
-		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json")).getJSONObject("credentials");
+		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
+				.getJSONObject("credentials");
 
-		Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
+		Platform.populateTestPlatforms(submoduleConnector, credentialData);
 
 		User.addNewLocalUser(l.getDbCon(), "correctUser", "correctPassword", "email@test.com", false);
 

@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.Map;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
+import co.clund.db.model.AbstractDbTable;
 
 public class ClientCommunityToken extends AbstractDbTable {
 

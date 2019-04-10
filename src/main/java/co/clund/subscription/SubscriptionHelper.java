@@ -15,15 +15,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.ExternalSubscription;
-import co.clund.db.model.InternalSubscription;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
-import co.clund.db.model.Video;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlStyleConstants;
-import co.clund.platform.PlatformVideo;
+import co.clund.submodule.video.dbmodel.ExternalSubscription;
+import co.clund.submodule.video.dbmodel.InternalSubscription;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.Video;
+import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.util.cache.DynamicAsyncExpiringCache;
 
 public class SubscriptionHelper {
@@ -35,8 +35,12 @@ public class SubscriptionHelper {
 
 	final DatabaseConnector dbCon;
 
-	public SubscriptionHelper(DatabaseConnector dbCon) {
+	private final co.clund.module.Video videoModule;
+
+	public SubscriptionHelper(DatabaseConnector dbCon, co.clund.module.Video videoModule) {
 		this.dbCon = dbCon;
+
+		this.videoModule = videoModule;//(co.clund.module.Video) dbCon.getListener().getReqHandler().moduleMap.get(co.clund.module.Video.VIDEO_LOCATION);
 	}
 
 	public List<HtmlGenericDiv> renderOrderedNewestVideosList() {
@@ -140,8 +144,7 @@ public class SubscriptionHelper {
 		});
 
 		@SuppressWarnings("unchecked")
-		FutureTask<List<PlatformVideo>> future = (FutureTask<List<PlatformVideo>>) dbCon
-				.getThreadExecutorMap(plat.getId())
+		FutureTask<List<PlatformVideo>> future = (FutureTask<List<PlatformVideo>>) videoModule.getThreadExecutorMap(plat.getId())
 				.insertTask(TASK_NAME_VIDEOS_FROM_CHANNEL + channelIdentifier, futureTask);
 
 		videosFutureList.add(future);

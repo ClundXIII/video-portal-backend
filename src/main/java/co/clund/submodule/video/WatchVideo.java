@@ -10,15 +10,15 @@ import org.apache.http.client.utils.URIBuilder;
 
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
-import co.clund.db.model.Video;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlPage;
 import co.clund.html.HtmlResponsiveColumns;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
-import co.clund.platform.AbstractPlatform;
-import co.clund.platform.PlatformVideo;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.Video;
+import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.subscription.SubscriptionHelper;
 import co.clund.util.cache.Cache;
 import co.clund.util.cache.PermanentCache;
@@ -36,7 +36,7 @@ public class WatchVideo extends AbstractModule {
 	public WatchVideo(AbstractModule parent, DatabaseConnector dbCon) {
 		super(parent.getModulePath(), LOCATION, dbCon);
 
-		subscriptionHelper = new SubscriptionHelper(dbCon);
+		subscriptionHelper = new SubscriptionHelper(dbCon, (co.clund.module.Video) parent);
 	}
 
 	@Override

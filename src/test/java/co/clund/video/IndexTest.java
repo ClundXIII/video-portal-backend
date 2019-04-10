@@ -7,11 +7,11 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.ExternalSubscription;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
 import co.clund.module.Video;
 import co.clund.submodule.video.VideoIndex;
+import co.clund.submodule.video.dbmodel.ExternalSubscription;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
@@ -33,9 +33,10 @@ public class IndexTest extends TestCase implements HttpTest {
 
 		DatabaseConnector.initializeDatabase(l.getDbCon());
 
-		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json")).getJSONObject("credentials");
+		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
+				.getJSONObject("credentials");
 
-		Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+		Platform.populateTestPlatforms(l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION), credentialData);
 
 		startHttpListener(l);
 
@@ -69,13 +70,15 @@ public class IndexTest extends TestCase implements HttpTest {
 
 		startHttpListener(l);
 
-		Platform.populateTestPlatforms(l.getDbCon(), getTestCredentials().getJSONObject("credentials"));
-		
-		User.addNewLocalUser(l.getDbCon(), "testUser1", "asdf1234", "test@clai.co", false);
+		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
+		Platform.populateTestPlatforms(submoduleConnector, getTestCredentials().getJSONObject("credentials"));
 
-		ExternalSubscription.addNewExternalSubscription(l.getDbCon(), 1, 1, "UCJs1mfRk0orBF9twGXaZA2w");
+		User.addNewLocalUser(l.getDbCon(), "testUser1", "asdf1234", "test@clund.co", false);
 
-		httpRequestAsUser("testUser1", "asdf1234", baseUrl, baseUrl + "/" + Video.VIDEO_LOCATION + "/" + VideoIndex.INDEX_LOCATION);
+		ExternalSubscription.addNewExternalSubscription(submoduleConnector, 1, 1, "UCJs1mfRk0orBF9twGXaZA2w");
+
+		httpRequestAsUser("testUser1", "asdf1234", baseUrl,
+				baseUrl + "/" + Video.VIDEO_LOCATION + "/" + VideoIndex.INDEX_LOCATION);
 
 	}
 

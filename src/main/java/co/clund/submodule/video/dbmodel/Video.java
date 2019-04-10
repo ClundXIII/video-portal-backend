@@ -1,4 +1,4 @@
-package co.clund.db.model;
+package co.clund.submodule.video.dbmodel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
+import co.clund.db.model.AbstractDbTable;
 import co.clund.util.cache.Cache;
 import co.clund.util.cache.PermanentCache;
 import co.clund.util.log.LoggingUtil;

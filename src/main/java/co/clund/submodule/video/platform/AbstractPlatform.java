@@ -1,4 +1,4 @@
-package co.clund.platform;
+package co.clund.submodule.video.platform;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -14,9 +14,9 @@ import org.apache.http.client.utils.URIBuilder;
 import org.reflections.Reflections;
 
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.cache.DynamicAsyncExpiringCache;
 import co.clund.util.log.LoggingUtil;
 
@@ -35,7 +35,7 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 		Map<String, Class<? extends AbstractPlatform>> reMap = new HashMap<>();
 
-		Reflections reflections = new Reflections("co.clund.platform");
+		Reflections reflections = new Reflections("co.clund.submodule.video.platform");
 		Set<Class<? extends AbstractPlatform>> allClasses = reflections.getSubTypesOf(AbstractPlatform.class);
 
 		for (Class<? extends AbstractPlatform> c : allClasses) {
@@ -60,7 +60,7 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 		List<AbstractPlatform> retList = new ArrayList<>();
 
-		Reflections reflections = new Reflections("co.clund.platform");
+		Reflections reflections = new Reflections("co.clund.submodule.video.platform");
 
 		Set<Class<? extends AbstractPlatform>> allClasses = reflections.getSubTypesOf(AbstractPlatform.class);
 
@@ -89,7 +89,9 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 			return cons.newInstance(new Object[] { stor });
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "error while creating AbstractPlatform", e);
+			logger.log(Level.SEVERE, "error while creating AbstractPlatform: " + e.getMessage());
+			logger.log(Level.SEVERE, "caused by");
+			e.printStackTrace();
 			return null;
 		}
 	}

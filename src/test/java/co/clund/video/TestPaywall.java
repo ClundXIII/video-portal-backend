@@ -9,11 +9,11 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.ExternalSubscription;
-import co.clund.db.model.Paywall;
-import co.clund.db.model.PaywallPass;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
+import co.clund.submodule.video.dbmodel.ExternalSubscription;
+import co.clund.submodule.video.dbmodel.Paywall;
+import co.clund.submodule.video.dbmodel.PaywallPass;
+import co.clund.submodule.video.dbmodel.Platform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;

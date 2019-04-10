@@ -15,10 +15,6 @@ import org.apache.http.client.utils.URIBuilder;
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.model.AbstractDbTable;
-import co.clund.db.model.Channel;
-import co.clund.db.model.ExternalSubscription;
-import co.clund.db.model.InternalSubscription;
-import co.clund.db.model.Platform;
 import co.clund.db.model.User;
 import co.clund.html.HtmlForm;
 import co.clund.html.HtmlGenericDiv;
@@ -33,7 +29,11 @@ import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
 import co.clund.module.Profile;
 import co.clund.module.FunctionResult.Status;
-import co.clund.platform.AbstractPlatform;
+import co.clund.submodule.video.dbmodel.Channel;
+import co.clund.submodule.video.dbmodel.ExternalSubscription;
+import co.clund.submodule.video.dbmodel.InternalSubscription;
+import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.platform.AbstractPlatform;
 
 public class ManageSubscriptions extends AbstractModule {
 
