@@ -10,7 +10,7 @@ import co.clund.db.DatabaseConnector;
 
 public class Forum extends AbstractModule {
 
-	public static final String FORUM_LOCATION = "content";
+	public static final String FORUM_LOCATION = "forum";
 
 	public Forum(@SuppressWarnings("unused") AbstractModule parent, DatabaseConnector dbCon) {
 		super("", FORUM_LOCATION, dbCon.getSubmoduleConnector(FORUM_LOCATION));
