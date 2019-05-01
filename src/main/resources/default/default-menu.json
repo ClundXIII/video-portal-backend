@@ -1,0 +1,38 @@
+[
+	{
+		"name"    : "Forum",
+		"type"    : "submenu",
+		"module"  : "forum",
+		"link"    : "/forum/index",
+		"submenu" : []
+	},
+	{
+		"name"    : "Content",
+		"type"    : "submenu",
+		"module"  : "video",
+		"link"    : "/video/index",
+		"submenu" : [
+		    { "name" : "Watch", "link": "/v"},
+		    { "name" : "Channel", "link": "/c"},
+		    { "name" : "Subscriptions", "link": "/subs"},
+		    { "name" : "Link only Subscription", "link": "/linkSub"}
+		]
+	},
+	{
+		"name"    : "Store",
+		"type"    : "submenu",
+		"module"  : "store",
+		"link"    : "/store/index",
+		"submenu" : []
+	},
+	{
+		"name"    : "Profile &amp; Settings",
+		"type"    : "manual-highlight",
+		"active-for" : ["/profile", "/settings"],
+		"link"    : "/profile",
+		"submenu" : [
+		    { "name" : "Profile", "link": "/profile"},
+		    { "name" : "Settings", "link": "/settings"},
+		]
+	}
+]

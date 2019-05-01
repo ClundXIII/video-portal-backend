@@ -20,6 +20,10 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.module.AbstractModule;
+import co.clund.module.Core;
+import co.clund.submodule.core.dbmodel.TBlock;
+import co.clund.submodule.core.dbmodel.TConfiguration;
+import co.clund.submodule.core.dbmodel.TMenuStructure;
 import co.clund.util.log.LoggingUtil;
 
 public class DatabaseConnector {
@@ -351,8 +355,16 @@ public class DatabaseConnector {
 	public static void initializeDatabase(DatabaseConnector dbCon) {
 		DbUtil.createAllTables(dbCon);
 
-		for (Entry<String, AbstractModule> e : dbCon.getListener().getReqHandler().moduleMap.entrySet() ) {
-			DbUtil.createAllTablesForModule(dbCon.getSubmoduleConnector(e.getKey()), "co.clund.submodule." + e.getKey());
+		for (Entry<String, AbstractModule> e : dbCon.getListener().getReqHandler().moduleMap.entrySet()) {
+			DbUtil.createAllTablesForModule(dbCon.getSubmoduleConnector(e.getKey()),
+					"co.clund.submodule." + e.getKey());
 		}
+
+		final DatabaseConnector coreSubModuleCon = dbCon.getSubmoduleConnector(Core.CORE_LOCATION);
+		TConfiguration.initializeDefaultConfig(coreSubModuleCon);
+
+		TBlock.initializeDefaultBlocks(coreSubModuleCon);
+
+		TMenuStructure.initializeDefaultConfig(coreSubModuleCon);
 	}
 }

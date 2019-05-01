@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.json.JSONObject;
 
 import co.clund.db.DatabaseConnector;
+import co.clund.db.DbVersionUpgrader;
 import co.clund.db.model.User;
 import co.clund.util.FileUtil;
 import co.clund.util.ResourceUtil;
@@ -38,7 +39,8 @@ public class App {
 			System.out.println("java -jar video-portal-backend.jar generate-tables <config file>");
 			System.out.println("  --> generates the initial tables");
 			System.out.println("");
-			System.out.println("java -jar video-portal-backend.jar add-superadmin <config file> <Username> <Password> <email>");
+			System.out.println(
+					"java -jar video-portal-backend.jar add-superadmin <config file> <Username> <Password> <email>");
 			System.out.println("  --> adds a user with root flag");
 			System.out.println("");
 			System.out.println("java -jar video-portal-backend.jar <config file>");
@@ -69,6 +71,8 @@ public class App {
 			JSONObject config = new JSONObject(FileUtil.getFileContentAsString(args[0]));
 
 			MainHttpListener l = new MainHttpListener(config);
+
+			DbVersionUpgrader.checkForUpgrades(l.getDbCon());
 
 			l.run();
 
