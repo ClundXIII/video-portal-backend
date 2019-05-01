@@ -24,6 +24,7 @@ import co.clund.module.Core;
 import co.clund.submodule.core.dbmodel.TBlock;
 import co.clund.submodule.core.dbmodel.TConfiguration;
 import co.clund.submodule.core.dbmodel.TMenuStructure;
+import co.clund.submodule.core.dbmodel.TSiteTemplate;
 import co.clund.util.log.LoggingUtil;
 
 public class DatabaseConnector {
@@ -365,6 +366,8 @@ public class DatabaseConnector {
 
 		TBlock.initializeDefaultBlocks(coreSubModuleCon);
 
-		TMenuStructure.initializeDefaultConfig(coreSubModuleCon);
+		TMenuStructure.initializeDefaultStructure(coreSubModuleCon);
+
+		TSiteTemplate.initializeDefaultTemplate(coreSubModuleCon);
 	}
 }

@@ -13,7 +13,7 @@ import co.clund.util.ResourceUtil;
 
 public class TMenuStructure extends AbstractDbTable {
 
-	public static final String DB_TABLE_NAME = "menu-structure";
+	public static final String DB_TABLE_NAME = "menu_structure";
 	public static final String DB_TABLE_COLUMN_NAME_NAME = "name";
 	public static final String DB_TABLE_COLUMN_NAME_KEY = "key";
 	public static final String DB_TABLE_COLUMN_NAME_CONTENT = "content";
@@ -90,10 +90,10 @@ public class TMenuStructure extends AbstractDbTable {
 	public String getContent() {
 		return content;
 	}
-	
-	public static void initializeDefaultConfig(DatabaseConnector dbCon) {
+
+	public static void initializeDefaultStructure(DatabaseConnector dbCon) {
 		String config = ResourceUtil.getResourceAsString("/default/default-menu.json");
-		
+
 		insertNewTMenuStructure(dbCon, "Default Menu", "default", config);
 	}
 

@@ -13,7 +13,7 @@ import co.clund.util.ResourceUtil;
 
 public class TBlock extends AbstractDbTable {
 
-	public static final String DB_TABLE_NAME = "user";
+	public static final String DB_TABLE_NAME = "block";
 	public static final String DB_TABLE_COLUMN_NAME_KEY = "key";
 	public static final String DB_TABLE_COLUMN_NAME_TYPE = "type";
 	public static final String DB_TABLE_COLUMN_NAME_CONTENT = "content";

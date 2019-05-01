@@ -16,7 +16,7 @@ public class MenuBlock extends AbstractBlock {
 	}
 
 	@Override
-	public String render(DatabaseConnector dbCon, String pagePath, UserSession session, String content) {
+	protected String render(DatabaseConnector dbCon, String pagePath, UserSession session, String content) {
 
 		JSONObject jData = new JSONObject(content);
 
@@ -58,8 +58,8 @@ public class MenuBlock extends AbstractBlock {
 				}
 				if (thisM.getString("type").equals("manual-highlight")) {
 					JSONArray activeForArray = thisM.getJSONArray("active-for");
-					
-					for (int j=0; j<activeForArray.length(); j++) {
+
+					for (int j = 0; j < activeForArray.length(); j++) {
 						if (pagePath.startsWith(activeForArray.getString(j))) {
 							subMenuList = thisM.getJSONArray("submenu");
 						}

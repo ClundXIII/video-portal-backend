@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>$page.title$</title>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="description" content="" />
+<meta name="author" content="" />
+<!-- <meta name="robots" content="noindex"> -->
+$page.meta_tags$
+<link rel='stylesheet' type='text/css' href='/css/bootstrap.min.css' />
+<link rel='stylesheet' type='text/css' href='/css/main.css' />
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64"
+	type="image/vnd.microsoft.icon">
+$page.style_tags$
+</head>
+<body>
+	<div id="region_header">$page.region.header$</div>
+	<div id="region_header_menu">$page.region.header_menu$</div>
+	<div id="region_header_breadcrumb">$page.region.header_breadcrumb<$/div>
+	<div class="row">
+		<div class="col-sm">$page.region.left_menu$</div>
+		<div id="region_content" class="col-6">$page.region.content$</div>
+		<div class="col-sm">$page.region.right_menu$</div>
+	</div>
+
+	<div class="row">
+		<div id="region_footer_left" class="col-sm">$page.region.footer_left$</div>
+		<div id="region_footer_middle" class="col-sm">$page.region.footer_middle$</div>
+		<div id="region_footer_right" class="col-sm">$page.region.footer_right$</div>
+	</div>
+	<div id="region_footer_bottom" style="width: 500px;" class="mx-auto">$page.region.footer_bottom$</div>
+
+	<script src='/js/jquery.min.js'></script>
+	<script src='/js/popper.min.js'></script>
+	<script src='/js/bootstrap.min.js'></script>
+	<script src='/js/main.js'></script>
+
+</body>
+</html>
