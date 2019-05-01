@@ -22,6 +22,7 @@ import co.clund.MainHttpListener;
 import co.clund.module.AbstractModule;
 import co.clund.module.Core;
 import co.clund.submodule.core.dbmodel.TBlock;
+import co.clund.submodule.core.dbmodel.TBlockRegionRelation;
 import co.clund.submodule.core.dbmodel.TConfiguration;
 import co.clund.submodule.core.dbmodel.TMenuStructure;
 import co.clund.submodule.core.dbmodel.TSiteTemplate;
@@ -39,6 +40,12 @@ public class DatabaseConnector {
 	private final java.util.logging.Logger logger = LoggingUtil.getDefaultLogger();
 
 	public final String uniqueKey;
+	
+	private final DatabaseConnector rootDbCon;
+
+	public DatabaseConnector getRootDbCon() {
+		return rootDbCon;
+	}
 
 	public DatabaseConnector(MainHttpListener listener, JSONObject dbConfig) {
 		dbPath = dbConfig.getString("path");
@@ -54,10 +61,12 @@ public class DatabaseConnector {
 		this.listener = listener;
 
 		uniqueKey = dbUser + "+" + dbPath + "_" + (int) (Math.random() * 100.f);
+		
+		rootDbCon = this;
 	}
 
 	private DatabaseConnector(MainHttpListener listener, String dbPath, String dbUser, String dbPassword,
-			String prefix) {
+			String prefix, DatabaseConnector rootDbCon) {
 		this.dbPath = dbPath;
 		this.dbUser = dbUser;
 		this.dbPassword = dbPassword;
@@ -67,6 +76,8 @@ public class DatabaseConnector {
 		this.listener = listener;
 
 		uniqueKey = dbUser + "+" + dbPath + "_" + (int) (Math.random() * 100.f);
+		
+		this.rootDbCon = rootDbCon;
 	}
 
 	public DatabaseConnector getSubmoduleConnector(String subModuleName) {
@@ -78,7 +89,7 @@ public class DatabaseConnector {
 
 		totalPrefix += subModuleName + "_";
 
-		return new DatabaseConnector(listener, dbPath, dbUser, dbPassword, totalPrefix);
+		return new DatabaseConnector(listener, dbPath, dbUser, dbPassword, totalPrefix, rootDbCon);
 	}
 
 	private Connection openConnection() throws SQLException {
@@ -369,5 +380,7 @@ public class DatabaseConnector {
 		TMenuStructure.initializeDefaultStructure(coreSubModuleCon);
 
 		TSiteTemplate.initializeDefaultTemplate(coreSubModuleCon);
+		
+		TBlockRegionRelation.initializeDefaultTBlockRegionRelation(coreSubModuleCon);
 	}
 }

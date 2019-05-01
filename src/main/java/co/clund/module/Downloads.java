@@ -18,7 +18,7 @@ public class Downloads extends AbstractModule {
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
-		HtmlPage p = new HtmlPage("Video Portal", null, null, s);
+		HtmlPage p = new HtmlPage("Video Portal", s, dbCon, "/" + DOWNLOADS_LOCATION);
 
 		p.writeH1("Content");
 		return p.finish().getBytes();

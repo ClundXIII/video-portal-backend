@@ -24,7 +24,7 @@ public class Index extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage p = new HtmlPage("<REPLACE with website name>", null, null, s);
+		HtmlPage p = new HtmlPage("<REPLACE with website name>", s, dbCon, "/" + INDEX_LOCATION);
 
 		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 

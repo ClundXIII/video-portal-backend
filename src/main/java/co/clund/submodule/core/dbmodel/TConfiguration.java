@@ -16,7 +16,7 @@ public class TConfiguration extends AbstractDbTable {
 
 	public static final String DB_TABLE_NAME = "configuration";
 	public static final String DB_TABLE_COLUMN_NAME_MODULE = "module";
-	public static final String DB_TABLE_COLUMN_NAME_KEY = "key";
+	public static final String DB_TABLE_COLUMN_NAME_KEY = "_key";
 	public static final String DB_TABLE_COLUMN_NAME_CONTENT = "content";
 
 	private final static Map<String, DbValueType> columnMap = new HashMap<>();
@@ -58,7 +58,7 @@ public class TConfiguration extends AbstractDbTable {
 	}
 
 	public static void initializeDefaultConfig(DatabaseConnector dbCon) {
-		writeConfiguration(dbCon, "core", "version", "" + DbVersionUpgrader.CURRENT_DB_VERSION_NUMBER);
+		writeConfiguration(dbCon, "db", "version", "" + DbVersionUpgrader.CURRENT_DB_VERSION_NUMBER);
 
 		for (String s : ResourceUtil.getResourceAsString("/default/default-settings.conf").split("\n")) {
 			if (s.equals(""))

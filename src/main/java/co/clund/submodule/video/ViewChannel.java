@@ -33,7 +33,7 @@ public class ViewChannel extends AbstractModule {
 		String channelName = "";
 
 		if (!parameters.containsKey(GET_PARAM_CHANNEL_ID)) {
-			HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
+			HtmlPage p = new HtmlPage("View Channel: " + channelName, s, dbCon, "/video/" + LOCATION);
 			p.writeLink("index", "main page");
 			return p.finish().getBytes();
 		}
@@ -53,7 +53,7 @@ public class ViewChannel extends AbstractModule {
 			channelName = channelIdentifier;
 		}
 
-		HtmlPage p = new HtmlPage("View Channel: " + channelName, null, null, s);
+		HtmlPage p = new HtmlPage("View Channel: " + channelName, s, dbCon, "/video/" + LOCATION);
 
 		HtmlGenericDiv div = new HtmlGenericDiv();
 

@@ -15,7 +15,7 @@ public class TMenuStructure extends AbstractDbTable {
 
 	public static final String DB_TABLE_NAME = "menu_structure";
 	public static final String DB_TABLE_COLUMN_NAME_NAME = "name";
-	public static final String DB_TABLE_COLUMN_NAME_KEY = "key";
+	public static final String DB_TABLE_COLUMN_NAME_KEY = "_key";
 	public static final String DB_TABLE_COLUMN_NAME_CONTENT = "content";
 
 	private final static Map<String, DbValueType> columnMap = new HashMap<>();

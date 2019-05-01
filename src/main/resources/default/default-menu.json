@@ -12,10 +12,10 @@
 		"module"  : "video",
 		"link"    : "/video/index",
 		"submenu" : [
-		    { "name" : "Watch", "link": "/v"},
-		    { "name" : "Channel", "link": "/c"},
-		    { "name" : "Subscriptions", "link": "/subs"},
-		    { "name" : "Link only Subscription", "link": "/linkSub"}
+		    { "name" : "Watch", "link": "/video/v"},
+		    { "name" : "Channel", "link": "/video/c"},
+		    { "name" : "Subscriptions", "link": "/video/subs"},
+		    { "name" : "Link only Subscription", "link": "/video/linkSub"}
 		]
 	},
 	{
@@ -32,7 +32,7 @@
 		"link"    : "/profile",
 		"submenu" : [
 		    { "name" : "Profile", "link": "/profile"},
-		    { "name" : "Settings", "link": "/settings"},
+		    { "name" : "Settings", "link": "/settings"}
 		]
 	}
 ]

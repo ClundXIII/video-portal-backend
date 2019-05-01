@@ -41,7 +41,7 @@ public class EditPlatform extends AbstractModule {
 			return "no access".getBytes();
 		}
 
-		HtmlPage p = new HtmlPage("Edit Platforms", null, null, s);
+		HtmlPage p = new HtmlPage("Edit Platforms", s, dbCon, "/video/" + LOCATION);
 
 		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 

@@ -33,7 +33,7 @@ public class Profile extends AbstractModule {
 
 		User thisUser = s.getThisUser();
 		if (thisUser == null) {
-			b = new HtmlPage("Login", null, null, s);
+			b = new HtmlPage("Login", s, dbCon, "/" + LOCATION);
 			b.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 
 			b.writeH1("Log in with Username and Password");
@@ -49,7 +49,7 @@ public class Profile extends AbstractModule {
 			return b.finish().getBytes();
 		}
 
-		b = new HtmlPage("Overview", null, null, s);
+		b = new HtmlPage("Overview", s, dbCon, "/" + LOCATION);
 		b.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 		b.writeText("Logged in as User: " + thisUser.getUsername());
 

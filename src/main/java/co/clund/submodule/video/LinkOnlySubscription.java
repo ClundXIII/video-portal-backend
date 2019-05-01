@@ -51,7 +51,7 @@ public class LinkOnlySubscription extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage b = new HtmlPage("Url Subscription - Video Portal", null, null, s);
+		HtmlPage b = new HtmlPage("Url Subscription - Video Portal", s, dbCon, "/video/" + LOCATION);
 
 		HtmlResponsiveColumns cols = new HtmlResponsiveColumns();
 

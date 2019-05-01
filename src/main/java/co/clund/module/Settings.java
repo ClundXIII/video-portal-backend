@@ -26,7 +26,7 @@ public class Settings extends AbstractModule {
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
-		HtmlPage p = new HtmlPage("User settings", null, null, s);
+		HtmlPage p = new HtmlPage("User settings", s, dbCon, "/" + LOCATION);
 
 		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 

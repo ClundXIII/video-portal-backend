@@ -20,7 +20,7 @@ public class ForumIndex extends AbstractModule {
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
-		HtmlPage p = new HtmlPage("Video Portal", null, null, s);
+		HtmlPage p = new HtmlPage("Video Portal", s, dbCon, "/forum/" + INDEX_LOCATION);
 
 		p.writeH1("Forum");
 		return p.finish().getBytes();

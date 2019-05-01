@@ -10,6 +10,7 @@ import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
 import co.clund.db.model.AbstractDbTable;
+import co.clund.util.ResourceUtil;
 
 public class TBlockRegionRelation extends AbstractDbTable {
 
@@ -52,11 +53,12 @@ public class TBlockRegionRelation extends AbstractDbTable {
 	}
 
 	public static void addNewTBlockRegionRelation(DatabaseConnector dbCon, String templateKey, String regionKey,
-			String blockKey) {
+			String blockKey, int position) {
 		dbCon.insert(DB_TABLE_NAME,
 				Arrays.asList(DB_TABLE_COLUMN_NAME_TEMPLATE_KEY, DB_TABLE_COLUMN_NAME_REGION_KEY,
-						DB_TABLE_COLUMN_NAME_BLOCK_KEY),
-				Arrays.asList(new DbValue(templateKey), new DbValue(regionKey), new DbValue(blockKey)));
+						DB_TABLE_COLUMN_NAME_BLOCK_KEY, DB_TABLE_COLUMN_NAME_POSITION),
+				Arrays.asList(new DbValue(templateKey), new DbValue(regionKey), new DbValue(blockKey),
+						new DbValue(position)));
 	}
 
 	public static TBlockRegionRelation getTBlockRegionRelationById(DatabaseConnector dbCon, int id) {
@@ -70,11 +72,12 @@ public class TBlockRegionRelation extends AbstractDbTable {
 		return getTBlockRegionRelationFromResult(result.get(0));
 	}
 
-	public static List<TBlockRegionRelation> getTBlockRegionRelationForTemplateRegion(DatabaseConnector dbCon,
+	public static List<TBlockRegionRelation> getOrderedTBlockRegionRelationsForTemplateRegion(DatabaseConnector dbCon,
 			String templateKey, String regionKey) {
 		List<Map<String, DbValue>> results = dbCon.select(DB_TABLE_NAME,
 				Arrays.asList(DB_TABLE_COLUMN_NAME_TEMPLATE_KEY, DB_TABLE_COLUMN_NAME_REGION_KEY),
-				Arrays.asList(new DbValue(templateKey), new DbValue(regionKey)), columnMap);
+				Arrays.asList(new DbValue(templateKey), new DbValue(regionKey)), columnMap,
+				" ORDER BY " + DB_TABLE_COLUMN_NAME_POSITION + " ASC ");
 
 		List<TBlockRegionRelation> retList = new ArrayList<>();
 
@@ -98,15 +101,19 @@ public class TBlockRegionRelation extends AbstractDbTable {
 	public int getId() {
 		return id;
 	}
-	/*
-	 * public static void initializeDefaultTBlockRegionRelation(DatabaseConnector
-	 * dbCon) { for (String s :
-	 * ResourceUtil.getResourceAsString("/default/default-blocks.conf").split("\n"))
-	 * { if (s.equals("")) continue; String key = s.split(" ")[0]; String typeString
-	 * = s.split(" ")[1]; BlockType type = BlockType.valueOf(typeString); String
-	 * content = s.substring(key.length() + typeString.length() + 2);
-	 * addNewTBlock(dbCon, key, type, content); } }
-	 */
+
+	public static void initializeDefaultTBlockRegionRelation(DatabaseConnector dbCon) {
+		for (String s : ResourceUtil.getResourceAsString("/default/default-block-region-relation.conf").split("\n")) {
+			if (s.equals(""))
+				continue;
+			String templateKey = s.split(" ")[0];
+			String regionKey = s.split(" ")[1];
+			String blockKey = s.split(" ")[2];
+			int position = new Integer(s.split(" ")[3]).intValue();
+
+			addNewTBlockRegionRelation(dbCon, templateKey, regionKey, blockKey, position);
+		}
+	}
 
 	public String getTemplateKey() {
 		return templateKey;

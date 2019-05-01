@@ -18,7 +18,7 @@ public class Feed extends AbstractModule {
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
-		HtmlPage p = new HtmlPage("Video Portal", null, null, s);
+		HtmlPage p = new HtmlPage("Video Portal", s, dbCon, "/" + FEED_LOCATION);
 
 		p.writeH1("Feed");
 		return p.finish().getBytes();

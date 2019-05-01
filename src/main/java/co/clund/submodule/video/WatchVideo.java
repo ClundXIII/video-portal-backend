@@ -45,7 +45,7 @@ public class WatchVideo extends AbstractModule {
 		try {
 			PlatformVideo vid = PlatformVideo.getVideo(dbCon, parameters.get(GET_PARAM_PLATFORM_VIDEO_KEY)[0]);
 
-			HtmlPage p = new HtmlPage(vid.getTitle() + " - Video Portal", null, null, s);
+			HtmlPage p = new HtmlPage(vid.getTitle() + " - Video Portal", s, dbCon, "/video/" + LOCATION);
 
 			p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 
@@ -90,7 +90,7 @@ public class WatchVideo extends AbstractModule {
 			return p.finish().getBytes();
 
 		} catch (Exception e) {
-			HtmlPage p = new HtmlPage("Video Portal", null, null, s);
+			HtmlPage p = new HtmlPage("Video Portal", s, dbCon, "/video/" + LOCATION);
 
 			logger.log(Level.WARNING, "Error while trying to load video div: " + e.getMessage());
 			e.printStackTrace();

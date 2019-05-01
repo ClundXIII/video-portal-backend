@@ -49,7 +49,7 @@ public abstract class AbstractBlock {
 			if (!Modifier.isAbstract(c.getModifiers())) {
 				Constructor<? extends AbstractBlock> cons;
 				try {
-					cons = c.getConstructor(AbstractBlock.class);
+					cons = c.getConstructor();
 					AbstractBlock m = cons.newInstance();
 					logger.log(Level.INFO, "Adding block \"" + m.getKey() + "\" from class \"" + m.toString() + "\"");
 					retMap.put(m.getKey(), m);

@@ -52,7 +52,7 @@ public class ManageSubscriptions extends AbstractModule {
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
 
-		HtmlPage p = new HtmlPage("Manage your Subscriptions", null, null, s);
+		HtmlPage p = new HtmlPage("Manage your Subscriptions", s, dbCon, "/video/" + LOCATION);
 
 		p.writeWithoutEscaping(HtmlPage.getMessage(parameters));
 

@@ -2,142 +2,73 @@ package co.clund.html;
 
 import static co.clund.html.Builder.escapeForHtml;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.json.JSONObject;
 
 import co.clund.UserSession;
-import co.clund.db.model.User;
-import co.clund.html.Menu.MenuEntry;
-import co.clund.util.RandomUtil;
+import co.clund.db.DatabaseConnector;
+import co.clund.html.block.AbstractBlock;
+import co.clund.module.Core;
+import co.clund.submodule.core.dbmodel.TBlock;
+import co.clund.submodule.core.dbmodel.TBlockRegionRelation;
+import co.clund.submodule.core.dbmodel.TConfiguration;
+import co.clund.submodule.core.dbmodel.TSiteTemplate;
 
 public class HtmlPage implements Builder {
 
-	private final StringBuilder sb = new StringBuilder();
+	private final StringBuilder contentSb = new StringBuilder();
 
-	private static final String PAGE_HTML_RESOURCE_NAME = "/html/page.html";
-	private static List<String> partsEndMarker = loadPartsEndMarker();
-	private static List<String> partsContent = loadPartsContent(partsEndMarker);
+	private final List<String> regions = new ArrayList<>();
 
-	public HtmlPage(String title, String script, String style, UserSession session) {
+	private final String pageTitle;
+	private final TSiteTemplate pageTemplate;
+	private final DatabaseConnector dbCon;
+	private final String pagePath;
+	private final UserSession session;
 
-		write(partsContent.get(0)); // Before Title
-		write(escapeForHtml(title));
-		write(partsContent.get(1)); // Before Script
-		write((script == null) ? "" : script);
-		write(partsContent.get(2)); // Before Style
-		write((style == null) ? "" : style);
-		write(partsContent.get(3)); // Before Menu
-
-		write("\n" + "<nav class='navbar navbar-expand-md navbar-light bg-light rounded'>\n"
-				+ "<a class='navbar-brand visible-md' href='#'>Menu</a>\n"
-				+ "<button class='navbar-toggler' type='button' data-toggle='collapse' "
-				+ " data-target='#navbarsExample04' aria-controls='navbarsExample04' "
-				+ " aria-expanded='false' aria-label='Toggle navigation'>\n"
-				+ "<span class='navbar-toggler-icon'></span>\n </button> "
-				+ "<div class='collapse navbar-collapse' id='navbarsExample04'>");
-
-		User thisUser = session.getThisUser();
-
-		write("<ul class='navbar-nav mr-auto'>");
-		for (MenuEntry m : Menu.loadMenuData(thisUser)) {
-			write(renderSubMenu(m));
-		}
-		write("</ul>");
-		if (thisUser != null) {
-			write("<ul class='nav navbar-nav navbar-right'>");
-			write(renderSubMenu(Menu.loadUserMenuData(thisUser.getUsername())));
-			write("</ul>");
-		} else {
-			write("<ul class='nav navbar-nav navbar-right'>");
-			write("<li class='nav-item'><a class='nav-link' a href='profile'>Login</a></li>\n");
-			write("</ul>");
-		}
-		write("\n</div></nav><br/>");
-		write(partsContent.get(4)); // Before Content
+	public HtmlPage(String pageTitle, UserSession session, DatabaseConnector dbCon, String pagePath) {
+		this(pageTitle, session, dbCon,
+				TConfiguration
+						.getConfigValueByModuleAndKey(dbCon.getRootDbCon().getSubmoduleConnector(Core.CORE_LOCATION),
+								Core.CORE_LOCATION, "site.template.default")
+						.getContent(),
+				pagePath);
 	}
 
-	private static String renderSubMenu(MenuEntry menuData) {
-		StringBuilder stream = new StringBuilder();
+	public HtmlPage(String pageTitle, UserSession session, DatabaseConnector dbCon, String pageTemplateKey,
+			String pagePath) {
+		this.pageTitle = pageTitle;
+		this.dbCon = dbCon.getRootDbCon().getSubmoduleConnector(Core.CORE_LOCATION);
 
-		if (menuData.subMenu == null) {
-			stream.append("<li class='nav-item'><a class='nav-link' a href='" + menuData.url + "'>"
-					+ escapeForHtml(menuData.name) + "</a></li>" + "\n");
-		} else {
-			String id = "aria_id_" + RandomUtil.getRandomString(30);
+		this.pageTemplate = TSiteTemplate.getTSiteTemplateByKey(this.dbCon, pageTemplateKey);
+		this.pagePath = pagePath;
+		this.session = session;
 
-			stream.append("<li class='nav-item dropdown'>");
+		String rawTemplate = pageTemplate.getContent();
+		while (true) {
+			int regionPos = rawTemplate.indexOf("$page.region.");
 
-			stream.append("<a class='nav-link dropdown-toggle' href='#' " + "id='" + id
-					+ "' data-toggle='dropdown' aria-haspopup='true' " + "aria-expanded='false'>"
-					+ escapeForHtml(menuData.name) + "</a>");
-
-			stream.append("<div class='dropdown-menu' aria-labelledby='" + id + "'>");
-
-			for (MenuEntry m : menuData.subMenu) {
-				stream.append("<a class='dropdown-item' href='" + m.url + "'>" + escapeForHtml(m.name) + "</a>" + "\n");
-			}
-			stream.append("</div></li>");
-		}
-		return stream.toString();
-	}
-
-	private static List<String> loadPartsEndMarker() {
-		List<String> retList = new ArrayList<>();
-
-		retList.add("TITLE");
-		retList.add("SCRIPT");
-		retList.add("STYLE");
-		retList.add("MENU");
-		retList.add("CONTENT");
-		retList.add("FOOTER");
-
-		return retList;
-	}
-
-	private static List<String> loadPartsContent(List<String> endMarkerList) {
-
-		List<String> retList = new ArrayList<>();
-
-		try (BufferedReader b = new BufferedReader(
-				new InputStreamReader(endMarkerList.getClass().getResourceAsStream(PAGE_HTML_RESOURCE_NAME)))) {
-
-			for (String s : endMarkerList) {
-				StringBuilder sb = new StringBuilder();
-
-				while (b.ready()) {
-					String tmp = b.readLine();
-					if (tmp.contains("-- " + s + " --")) {
-						break;
-					}
-					sb.append(tmp + "\n");
-				}
-
-				retList.add(sb.toString());
+			if (regionPos < 0) {
+				break;
 			}
 
-			StringBuilder sb = new StringBuilder();
+			rawTemplate = rawTemplate.substring(regionPos + 13);
 
-			while (b.ready()) {
-				String tmp = b.readLine();
-				sb.append(tmp + "\n");
-			}
+			String regionName = rawTemplate.substring(0, rawTemplate.indexOf("$"));
 
-			retList.add(sb.toString());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			regions.add(regionName);
+
+			rawTemplate = rawTemplate.substring(1 + regionName.length()); // cut away the ending $
 		}
 
-		return retList;
 	}
 
 	private void write(String html) {
-		sb.append(html + "\n");
-
+		contentSb.append(html + "\n");
 	}
 
 	@Override
@@ -147,11 +78,46 @@ public class HtmlPage implements Builder {
 
 	@Override
 	public String finish() {
-		sb.append(partsContent.get(5)); // Before Footer
 
-		sb.append("2019 (c) Connor Hill and Simon Michalke, powered by <a href=\"https://bluedrake42.com\">Bluedrake42 Ltd</a>");
-		sb.append(partsContent.get(6)); // After Footer
-		return sb.toString();
+		String content = pageTemplate.getContent();
+
+		content = content.replace("$page.title$", pageTitle);
+
+		for (String r : regions) {
+			List<TBlockRegionRelation> blockList = TBlockRegionRelation
+					.getOrderedTBlockRegionRelationsForTemplateRegion(dbCon, pageTemplate.getKey(), r);
+
+			StringBuilder blockContent = new StringBuilder();
+
+			for (TBlockRegionRelation br : blockList) {
+				TBlock b = TBlock.getTBlockByKey(dbCon, br.getBlockKey());
+
+				switch (b.getType()) {
+				case HTML:
+					blockContent.append(b.getContent());
+					break;
+				case CLASS:
+					JSONObject bJData = new JSONObject(b.getContent());
+					blockContent.append(
+							AbstractBlock.render(dbCon, bJData.getString("type"), pagePath, session, b.getContent()));
+					break;
+				case NATIVE:
+					switch (b.getKey()) {
+					case "content":
+						blockContent.append(contentSb.toString());
+						break;
+					default:
+						throw new RuntimeException("unknown native block type");
+					}
+					break;
+				default:
+					throw new RuntimeException("unknown block type");
+				}
+			}
+			content = content.replace("$page.region." + r + "$", blockContent.toString());
+		}
+
+		return content;
 	}
 
 	public static String getMessage(Map<String, String[]> parameters) {

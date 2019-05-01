@@ -27,7 +27,7 @@ public class Api extends AbstractModule {
 
 	@Override
 	protected byte[] invokePlain(UserSession s, Map<String, String[]> parameters) {
-		HtmlPage p = new HtmlPage("Api Documentation", null, null, s);
+		HtmlPage p = new HtmlPage("Api Documentation", s, dbCon, "/" + LOCATION);
 
 		if ((s.getThisUser() == null) || (!s.getThisUser().getIsRoot())) {
 			p.writeText("no access");
