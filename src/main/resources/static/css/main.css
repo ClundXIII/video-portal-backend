@@ -114,4 +114,10 @@ div.video_preview a img.yt-thumbnail {
     margin-top:-15px;
 }
 
-/*.dropdown-toggle:focus + .dropdown-menu { display: block; }*/ 
+.region-test-border {
+	border-style: solid;
+	border-width: 2px;
+}
+
+/*.dropdown-toggle:focus + .dropdown-menu { display: block; }*/
+ 

@@ -83,6 +83,9 @@ public class HtmlPage implements Builder {
 
 		content = content.replace("$page.title$", pageTitle);
 
+		content = content.replace("$page.meta_tags$", "");
+		content = content.replace("$page.style_tags$", "");
+
 		for (String r : regions) {
 			List<TBlockRegionRelation> blockList = TBlockRegionRelation
 					.getOrderedTBlockRegionRelationsForTemplateRegion(dbCon, pageTemplate.getKey(), r);
