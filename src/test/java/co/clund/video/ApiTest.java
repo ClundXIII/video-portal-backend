@@ -9,9 +9,6 @@ import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
 import co.clund.db.model.User;
 import co.clund.module.Api;
-import co.clund.module.Video;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import junit.framework.TestCase;
 
@@ -32,12 +29,6 @@ public class ApiTest extends TestCase implements HttpTest {
 		MainHttpListener l = new MainHttpListener(jData);
 
 		DatabaseConnector.initializeDatabase(l.getDbCon());
-
-		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
-				.getJSONObject("credentials");
-
-		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		Platform.populateTestPlatforms(submoduleConnector, credentialData);
 
 		User.addNewLocalUser(l.getDbCon(), "correctUser", "correctPassword", "email@test.com", true);
 

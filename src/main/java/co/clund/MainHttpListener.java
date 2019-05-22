@@ -16,6 +16,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.json.*;
 
 import co.clund.db.DatabaseConnector;
+import co.clund.oauth2.OAuth2CallbackHandler;
 import co.clund.util.cache.ExpiringCache;
 import co.clund.util.log.Jetty2LoggerBridge;
 import co.clund.util.log.LoggingUtil;
@@ -31,6 +32,8 @@ public class MainHttpListener {
 	public static final String JSON_VARNAME_SITE_URL = "siteUrl";
 
 	Logger logger = LoggingUtil.getDefaultLogger();
+
+	private final OAuth2CallbackHandler callBackHandler = new OAuth2CallbackHandler();
 
 	private class ListenInfo {
 		private final String ip;
@@ -157,6 +160,10 @@ public class MainHttpListener {
 
 	public String getSiteUrl() {
 		return siteUrl;
+	}
+
+	public OAuth2CallbackHandler getCallBackHandler() {
+		return callBackHandler;
 	}
 
 }

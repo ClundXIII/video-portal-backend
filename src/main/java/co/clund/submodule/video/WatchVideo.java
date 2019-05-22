@@ -15,9 +15,10 @@ import co.clund.html.HtmlPage;
 import co.clund.html.HtmlResponsiveColumns;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.submodule.video.dbmodel.Video;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.submodule.video.subscription.SubscriptionHelper;
 import co.clund.util.cache.Cache;
@@ -61,8 +62,11 @@ public class WatchVideo extends AbstractModule {
 
 			URIBuilder channelBuilder = new URIBuilder("c");
 
-			final Platform platformById = Platform.getPlatformById(dbCon, vid.getPlatformId());
-			AbstractPlatform plat = AbstractPlatform.getPlatformFromConfig(platformById);
+			final VideoPlatform platformById = VideoPlatform.getPlatformById(dbCon, vid.getPlatformId());
+			AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon,
+					platformById);
+			AbstractVideoPlatform plat = AbstractVideoPlatform.getPlatformFromConfig(platformById,
+					abstractOAuth2UserPlatform);
 
 			channelBuilder.addParameter("id", platformById.getKey() + "_" + vid.getChannelIdentifier());
 

@@ -18,15 +18,14 @@ import co.clund.db.DatabaseConnector;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlStyleConstants;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.HttpRequestUtil;
 
-public class YoutubePlatform extends AbstractPlatform {
+public class YoutubePlatform extends AbstractVideoPlatform {
 
 	private static final Pattern CHANNEL_REGEXP_CHANNEL = Pattern.compile("youtube\\.com/channel/");
 	private static final Pattern CHANNEL_REGEXP_USER = Pattern.compile("youtube\\.com/user/");
-
-	private static final String OAUTH2_ENTRY = "https://accounts.google.com/o/oauth2/v2/auth";
 
 	public static final String PLATFORM_KEY = "youtube";
 
@@ -34,11 +33,11 @@ public class YoutubePlatform extends AbstractPlatform {
 
 	private final String apiKey;
 
-	public YoutubePlatform(Platform platform) {
-		super(platform);
+	public YoutubePlatform(VideoPlatform platform, AbstractOAuth2UserPlatform oAuth2UserPlatform) {
+		super(platform, oAuth2UserPlatform);
 		String tmpApiKey = null;
 		try {
-			tmpApiKey = platform.getConfig().getString("api_key");
+			tmpApiKey = oAuth2UserPlatform.getdBOAuth2Platform().getConfig().getString("api_key");
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Error while initializing Youtube platform: " + e.getMessage());
 		}
@@ -290,42 +289,10 @@ public class YoutubePlatform extends AbstractPlatform {
 	}
 
 	@Override
-	public long getClientCredentialsExpirationTime() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon) {
-		URIBuilder builder = null;
-		try {
-			builder = new URIBuilder(OAUTH2_ENTRY);
-
-			builder.addParameter("client_id", platform.getConfig().getString("oauth2_client_id"));
-			builder.addParameter("redirect_uri", dbCon.getListener().getSiteUrl() + "/oauth2.callback");
-			builder.addParameter("scope", "https://www.googleapis.com/auth/youtube.readonly");
-			builder.addParameter("access_type", "offline");
-
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		return builder;
-	}
-
-	@Override
 	public URIBuilder getClientCredentialsUploadRequestBuilder(DatabaseConnector dbCon) {
-		URIBuilder builder = null;
+		URIBuilder builder = oAuth2UserPlatform.getScopelessClientCredentialsRequestBuilder(dbCon);
 		try {
-			builder = new URIBuilder(OAUTH2_ENTRY);
-
-			builder.addParameter("client_id", platform.getConfig().getString("oauth2_client_id"));
-			builder.addParameter("redirect_uri", dbCon.getListener().getSiteUrl() + "/oauth2.callback");
 			builder.addParameter("scope", "https://www.googleapis.com/auth/youtube.upload");
-			builder.addParameter("access_type", "offline");
-			builder.addParameter("include_granted_scopes", "true");
-
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getMessage());
 			e.printStackTrace();
@@ -334,21 +301,4 @@ public class YoutubePlatform extends AbstractPlatform {
 		return builder;
 	}
 
-	@Override
-	public String getClientCredentialsFromCallback(Map<String, String> callBackData) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String renewClientCredentials(String clientCredentials) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void revokeClientCredentials(String clientCredentials) {
-		// TODO Auto-generated method stub
-
-	}
 }

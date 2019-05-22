@@ -67,9 +67,7 @@ public class MenuBlock extends AbstractBlock {
 				}
 			}
 
-			if (subMenuList == null) {
-				retData.append("error: cannot find secondary menu");
-			} else {
+			if (subMenuList != null) { // no submenu is a valid use case!
 				for (int i = 0; i < subMenuList.length(); i++) {
 					retData.append(renderMenuEntry(subMenuList.getJSONObject(i)));
 				}
@@ -78,7 +76,7 @@ public class MenuBlock extends AbstractBlock {
 			retData.append("</ul>");
 		}
 
-		retData.append("\n</div></nav><br/>");
+		retData.append("\n</div></nav>");
 
 		return retData.toString();
 	}

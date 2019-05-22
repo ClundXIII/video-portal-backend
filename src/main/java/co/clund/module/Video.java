@@ -8,7 +8,7 @@ import java.util.logging.Level;
 
 import co.clund.UserSession;
 import co.clund.db.DatabaseConnector;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.RatelimitAbidingThreadPoolExecutor;
 
 public class Video extends AbstractModule {
@@ -23,9 +23,9 @@ public class Video extends AbstractModule {
 			int ratelimit = 100;
 
 			try {
-				Platform plat = Platform.getPlatformById(dbCon, platformId);
+				VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, platformId);
 
-				ratelimit = plat.getConfig().getInt(Platform.PLATFORM_JSON_CONFIG_RATELIMIT);
+				ratelimit = plat.getConfig().getInt(VideoPlatform.PLATFORM_JSON_CONFIG_RATELIMIT);
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "no ratelimit set for platform with id " + platformId
 						+ ", defaulting to 100!\n" + e.getMessage());

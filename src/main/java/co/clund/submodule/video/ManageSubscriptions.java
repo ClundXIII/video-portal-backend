@@ -28,12 +28,13 @@ import co.clund.html.HtmlTable.HtmlTableRow;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
 import co.clund.module.Profile;
-import co.clund.module.FunctionResult.Status;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
 import co.clund.submodule.video.dbmodel.Channel;
 import co.clund.submodule.video.dbmodel.ExternalSubscription;
 import co.clund.submodule.video.dbmodel.InternalSubscription;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
+import co.clund.submodule.video.platform.PlatformVideo;
 
 public class ManageSubscriptions extends AbstractModule {
 
@@ -86,7 +87,7 @@ public class ManageSubscriptions extends AbstractModule {
 
 		HtmlTable intSubTable = new HtmlTable();
 
-		intSubTable.addHeader(Arrays.asList("Channel", "User", "Platform", "Unsubscribe"));
+		intSubTable.addHeader(Arrays.asList("Channel", "User", "VideoPlatform", "Unsubscribe"));
 
 		List<InternalSubscription> internalSubs = InternalSubscription.getInternalSubscriptionByUserId(dbCon,
 				thisUser.getId());
@@ -105,7 +106,7 @@ public class ManageSubscriptions extends AbstractModule {
 
 				row.writeText(u.getUsername());
 
-				Platform plat = Platform.getPlatformById(dbCon, c.getPlatformId());
+				VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, c.getPlatformId());
 
 				row.writeText(plat.getName());
 
@@ -129,7 +130,7 @@ public class ManageSubscriptions extends AbstractModule {
 
 		HtmlTable extSubTable = new HtmlTable();
 
-		extSubTable.addHeader(Arrays.asList("Channel", "User", "Platform", "Unsubscribe"));
+		extSubTable.addHeader(Arrays.asList("Channel", "User", "VideoPlatform", "Unsubscribe"));
 
 		List<ExternalSubscription> externalSubs = ExternalSubscription.getExternalSubscriptionByUserId(dbCon,
 				thisUser.getId());
@@ -140,9 +141,11 @@ public class ManageSubscriptions extends AbstractModule {
 
 				HtmlTableRow row = extSubTable.new HtmlTableRow();
 
-				Platform plat = Platform.getPlatformById(dbCon, extSub.getPlatformId());
+				VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, extSub.getPlatformId());
 
-				AbstractPlatform f = AbstractPlatform.getPlatformFromConfig(plat);
+				AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon,
+						plat);
+				AbstractVideoPlatform f = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
 
 				row.writeLink(f.getOriginalChannelLink(extSub.getChannelIdentifier()),
 						f.getCachedChannelName(extSub.getChannelIdentifier()), true);
@@ -175,7 +178,7 @@ public class ManageSubscriptions extends AbstractModule {
 			URIBuilder urlSubBuilder = new URIBuilder(LinkOnlySubscription.LOCATION);
 
 			for (ExternalSubscription sub : externalSubs) {
-				Platform plat = Platform.getPlatformById(dbCon, sub.getPlatformId());
+				VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, sub.getPlatformId());
 
 				urlSubBuilder.addParameter(LinkOnlySubscription.GET_PARAM_SUB,
 						plat.getKey() + "_" + sub.getChannelIdentifier());
@@ -215,7 +218,7 @@ public class ManageSubscriptions extends AbstractModule {
 
 			String platformKey = null;
 
-			for (Entry<Pattern, String> regExpEntry : Platform.getPlatformRegExps(dbCon).entrySet()) {
+			for (Entry<Pattern, String> regExpEntry : VideoPlatform.getPlatformRegExps(dbCon).entrySet()) {
 				System.out.println("trying " + regExpEntry.getKey().pattern());
 				if (regExpEntry.getKey().matcher(channelUrl).find()) {
 					platformKey = regExpEntry.getValue();
@@ -228,9 +231,12 @@ public class ManageSubscriptions extends AbstractModule {
 				return new FunctionResult(FunctionResult.Status.FAILED, getModuleName(), "cannot detect platform!");
 			}
 
-			Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+			VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
 
-			AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+			AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon,
+					plat);
+			AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat,
+					abstractOAuth2UserPlatform);
 
 			String channelIdentifier = abPlat.getChannelIdentifierFromUrl(channelUrl);
 

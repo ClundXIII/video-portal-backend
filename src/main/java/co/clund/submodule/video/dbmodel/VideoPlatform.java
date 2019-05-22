@@ -14,15 +14,16 @@ import co.clund.db.DatabaseConnector;
 import co.clund.db.DbValue;
 import co.clund.db.DbValueType;
 import co.clund.db.model.AbstractDbTable;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
 
-public class Platform extends AbstractDbTable {
+public class VideoPlatform extends AbstractDbTable {
 
 	public static final String DB_TABLE_NAME = "platform";
 	public static final String DB_TABLE_COLUMN_NAME_KEY = "_key";
 	public static final String DB_TABLE_COLUMN_NAME_NAME = "name";
 	public static final String DB_TABLE_COLUMN_NAME_TYPE = "type";
 	public static final String DB_TABLE_COLUMN_NAME_CONFIG = "config";
+	public static final String DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID = "oauth2_plat_id";
 
 	public static final String PLATFORM_JSON_CONFIG_RATELIMIT = "rate_limit";
 
@@ -33,6 +34,7 @@ public class Platform extends AbstractDbTable {
 		columnMap.put(DB_TABLE_COLUMN_NAME_NAME, DbValueType.STRING);
 		columnMap.put(DB_TABLE_COLUMN_NAME_TYPE, DbValueType.STRING);
 		columnMap.put(DB_TABLE_COLUMN_NAME_CONFIG, DbValueType.STRING);
+		columnMap.put(DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID, DbValueType.INTEGER);
 	}
 
 	private final int id;
@@ -40,24 +42,26 @@ public class Platform extends AbstractDbTable {
 	private final String name;
 	private final String type;
 	private final JSONObject config;
+	private final int oauth2PlatId;
 
-	public static Platform dummyPlatform = new Platform();
+	public static VideoPlatform dummyPlatform = new VideoPlatform();
 
-	private static final Map<String, Map<Integer, Platform>> idCache = new HashMap<>();
+	private static final Map<String, Map<Integer, VideoPlatform>> idCache = new HashMap<>();
 
-	private static final Map<String, Map<String, Platform>> keyCache = new HashMap<>();
+	private static final Map<String, Map<String, VideoPlatform>> keyCache = new HashMap<>();
 
-	public Platform() {
-		this(-1, null, null, null, null);
+	public VideoPlatform() {
+		this(-1, null, null, null, null, -1);
 	}
 
-	public Platform(int id, String key, String name, String type, String config) {
+	public VideoPlatform(int id, String key, String name, String type, String config, int oauth2_plat_id) {
 		super(DB_TABLE_NAME, columnMap);
 
 		this.id = id;
 		this.key = key;
 		this.name = name;
 		this.type = type;
+		this.oauth2PlatId = oauth2_plat_id;
 
 		JSONObject tmpConfig = null;
 
@@ -70,19 +74,20 @@ public class Platform extends AbstractDbTable {
 		this.config = tmpConfig;
 	}
 
-	private static Platform getPlatformFromDbResult(Map<String, DbValue> result) {
+	private static VideoPlatform getPlatformFromDbResult(Map<String, DbValue> result) {
 		int id = result.get(DB_TABLE_COLUMN_NAME_ID).getInt();
 		String key = result.get(DB_TABLE_COLUMN_NAME_KEY).getString();
 		String name = result.get(DB_TABLE_COLUMN_NAME_NAME).getString();
 		String type = result.get(DB_TABLE_COLUMN_NAME_TYPE).getString();
 		String config = result.get(DB_TABLE_COLUMN_NAME_CONFIG).getString();
+		int oauth2PlatId = result.get(DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID).getInt();
 
-		return new Platform(id, key, name, type, config);
+		return new VideoPlatform(id, key, name, type, config, oauth2PlatId);
 	}
 
-	public static Platform getPlatformById(DatabaseConnector dbCon, int platformId) {
+	public static VideoPlatform getPlatformById(DatabaseConnector dbCon, int platformId) {
 
-		Platform p1 = getIdCache(dbCon).get(new Integer(platformId));
+		VideoPlatform p1 = getIdCache(dbCon).get(new Integer(platformId));
 
 		if (p1 != null) {
 			return p1;
@@ -93,16 +98,16 @@ public class Platform extends AbstractDbTable {
 
 		Map<String, DbValue> result = results.get(0);
 
-		Platform p = getPlatformFromDbResult(result);
+		VideoPlatform p = getPlatformFromDbResult(result);
 
 		getIdCache(dbCon).put(new Integer(platformId), p);
 
 		return p;
 	}
 
-	public static Platform getPlatformByKey(DatabaseConnector dbCon, String key) {
+	public static VideoPlatform getPlatformByKey(DatabaseConnector dbCon, String key) {
 
-		Platform p1 = getKeyCache(dbCon).get(key);
+		VideoPlatform p1 = getKeyCache(dbCon).get(key);
 
 		if (p1 != null) {
 			return p1;
@@ -113,7 +118,7 @@ public class Platform extends AbstractDbTable {
 
 		Map<String, DbValue> result = results.get(0);
 
-		Platform p = getPlatformFromDbResult(result);
+		VideoPlatform p = getPlatformFromDbResult(result);
 
 		getKeyCache(dbCon).put(key, p);
 
@@ -141,11 +146,15 @@ public class Platform extends AbstractDbTable {
 		return key;
 	}
 
+	public int getOauth2PlatId() {
+		return oauth2PlatId;
+	}
+
 	public static Map<Pattern, String> getPlatformRegExps(DatabaseConnector dbCon) {
 		Map<Pattern, String> retMap = new HashMap<>();
 
-		for (Platform p : getAllPlatform(dbCon)) {
-			AbstractPlatform abstPlat = AbstractPlatform.getPlatformFromConfig(p);
+		for (VideoPlatform p : getAllPlatform(dbCon)) {
+			AbstractVideoPlatform abstPlat = AbstractVideoPlatform.getPlatformFromConfig(p, null);
 			for (Pattern regExp : abstPlat.getSubscriptionRegExps()) {
 				retMap.put(regExp, p.getKey());
 			}
@@ -154,9 +163,9 @@ public class Platform extends AbstractDbTable {
 		return retMap;
 	}
 
-	public static List<Platform> getAllPlatform(DatabaseConnector dbCon) {
+	public static List<VideoPlatform> getAllPlatform(DatabaseConnector dbCon) {
 
-		List<Platform> retList = new ArrayList<>();
+		List<VideoPlatform> retList = new ArrayList<>();
 
 		List<Map<String, DbValue>> results = dbCon.select(DB_TABLE_NAME, dummyPlatform.getColumns());
 
@@ -168,50 +177,33 @@ public class Platform extends AbstractDbTable {
 		return retList;
 	}
 
-	public static void addNewPlatform(DatabaseConnector dbCon, String key, String name, String type) {
+	public static void addNewPlatform(DatabaseConnector dbCon, String key, String name, String type,
+			int oAuth2PlatformId) {
 		dbCon.insert(DB_TABLE_NAME,
 				Arrays.asList(DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_TYPE,
-						DB_TABLE_COLUMN_NAME_CONFIG),
-				Arrays.asList(new DbValue(key), new DbValue(name), new DbValue(type), new DbValue("{}")));
+						DB_TABLE_COLUMN_NAME_CONFIG, DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID),
+				Arrays.asList(new DbValue(key), new DbValue(name), new DbValue(type), new DbValue("{}"),
+						new DbValue(oAuth2PlatformId)));
 	}
 
-	public void edit(DatabaseConnector dbCon, String newKey, String newName, String newType, String newConfig) {
+	public void edit(DatabaseConnector dbCon, String newKey, String newName, String newType, String newConfig,
+			int oAuth2PlatId2) {
 
-		Platform oldP = Platform.getPlatformById(dbCon, id);
+		VideoPlatform oldP = VideoPlatform.getPlatformById(dbCon, id);
 
 		getIdCache(dbCon).remove(new Integer(oldP.getId()));
 		getKeyCache(dbCon).remove(oldP.getKey());
 
 		dbCon.updateValue(DB_TABLE_NAME,
 				Arrays.asList(DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_TYPE,
-						DB_TABLE_COLUMN_NAME_CONFIG),
+						DB_TABLE_COLUMN_NAME_CONFIG, DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID),
 				Arrays.asList(new DbValue(newKey), new DbValue(newName), new DbValue(newType),
-						new DbValue(new JSONObject(newConfig).toString())),
+						new DbValue(new JSONObject(newConfig).toString()), new DbValue(oAuth2PlatId2)),
 				DB_TABLE_COLUMN_NAME_ID, new DbValue(id));
 
 	}
 
-	public static void populateTestPlatforms(DatabaseConnector dbCon, JSONObject credentialData) {
-		dbCon.insert(DB_TABLE_NAME,
-				Arrays.asList(DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_TYPE,
-						DB_TABLE_COLUMN_NAME_CONFIG),
-				Arrays.asList(new DbValue("Youtube"), new DbValue("yt01"), new DbValue("youtube"), new DbValue(
-						"{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}")));
-
-		final JSONObject vimeoData = credentialData.getJSONObject("vimeo");
-		dbCon.insert(DB_TABLE_NAME,
-				Arrays.asList(DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_TYPE,
-						DB_TABLE_COLUMN_NAME_CONFIG),
-				Arrays.asList(new DbValue("Vimeo"), new DbValue("vi01"), new DbValue("vimeo"),
-						new DbValue("{\"client_id\":\"" + vimeoData.getString("client_id") + "\","
-								+ "\"client_secret\":\"" + vimeoData.getString("client_secret") + "\","
-								+ "\"oauth2_client_id\":\"" + vimeoData.getString("oauth2_client_id") + "\","
-								+ "\"oauth2_client_secret\":\"" + vimeoData.getString("oauth2_client_secret")
-								+ "\"}")));
-
-	}
-
-	private static Map<Integer, Platform> getIdCache(DatabaseConnector dbCon) {
+	private static Map<Integer, VideoPlatform> getIdCache(DatabaseConnector dbCon) {
 		String key = dbCon.uniqueKey;
 
 		if (!idCache.containsKey(key)) {
@@ -221,7 +213,7 @@ public class Platform extends AbstractDbTable {
 		return idCache.get(key);
 	}
 
-	private static Map<String, Platform> getKeyCache(DatabaseConnector dbCon) {
+	private static Map<String, VideoPlatform> getKeyCache(DatabaseConnector dbCon) {
 		String key = dbCon.uniqueKey;
 
 		if (!keyCache.containsKey(key)) {

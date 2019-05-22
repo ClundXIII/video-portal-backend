@@ -7,13 +7,15 @@ import java.util.List;
 import org.json.JSONObject;
 
 import co.clund.db.DatabaseConnector;
+import co.clund.db.model.DBOAuth2Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlImg;
 import co.clund.html.HtmlStyleConstants;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
 import co.clund.submodule.video.ViewChannel;
 import co.clund.submodule.video.WatchVideo;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.submodule.video.dbmodel.Video;
 import co.clund.util.cache.DynamicAsyncExpiringCache;
 
@@ -126,7 +128,7 @@ public class PlatformVideo {
 		return additionalCssClasses;
 	}
 
-	private static PlatformVideo getCacheVideo(DatabaseConnector dbCon, AbstractPlatform abPlat, String identifier)
+	private static PlatformVideo getCacheVideo(DatabaseConnector dbCon, AbstractVideoPlatform abPlat, String identifier)
 			throws RateLimitException {
 
 		if (videoCache.contains(identifier)) {
@@ -163,7 +165,7 @@ public class PlatformVideo {
 		retObj.put("title", title);
 		retObj.put("description", description);
 
-		String fullVideoKey = Platform.getPlatformById(dbCon, platformId).getKey() + "_" + videoIdentifier;
+		String fullVideoKey = VideoPlatform.getPlatformById(dbCon, platformId).getKey() + "_" + videoIdentifier;
 
 		retObj.put(FULL_VIDEO_KEY, fullVideoKey);
 
@@ -171,9 +173,18 @@ public class PlatformVideo {
 	}
 
 	private String getFullIdentifier(DatabaseConnector dbCon) {
-		Platform p = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform p = VideoPlatform.getPlatformById(dbCon, platformId);
 
 		return p.getKey() + "_" + videoIdentifier;
+	}
+
+	public static AbstractOAuth2UserPlatform getOAuth2PlatformIfNeeded(DatabaseConnector dbCon, VideoPlatform plat) {
+		if (plat.getOauth2PlatId() > 0) {		
+			DBOAuth2Platform dBAuth2Plat = DBOAuth2Platform.getPlatformById(dbCon, plat.getOauth2PlatId());
+	
+			return AbstractOAuth2UserPlatform.getAbstractOAuth2UserPlatformFromType(dBAuth2Plat);
+		}
+		return null;
 	}
 
 	public static PlatformVideo getVideo(DatabaseConnector dbCon, String fullVideoKey) throws RateLimitException {
@@ -181,9 +192,11 @@ public class PlatformVideo {
 
 		String videoIdent = fullVideoKey.substring(fullVideoKey.indexOf("_") + 1);
 
-		Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+		VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
+		
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, plat);
 
-		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
 
 		return PlatformVideo.getCacheVideo(dbCon, abPlat, videoIdent);
 	}
@@ -193,9 +206,11 @@ public class PlatformVideo {
 	}
 
 	public HtmlGenericDiv renderBuilder(DatabaseConnector dbCon) throws RateLimitException {
-		Platform platform = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform platform = VideoPlatform.getPlatformById(dbCon, platformId);
 
-		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(platform);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, platform);
+		
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(platform,abstractOAuth2UserPlatform);
 
 		return abPlat.renderVideo(this);
 	}
@@ -203,22 +218,23 @@ public class PlatformVideo {
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, int platformId, String channelIdentifier)
 			throws RateLimitException {
 
-		Platform p = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform p = VideoPlatform.getPlatformById(dbCon, platformId);
 
 		return getLatestVideos(dbCon, p, channelIdentifier);
 	}
 
-	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, Platform p, String channelIdentifier)
+	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, VideoPlatform p, String channelIdentifier)
 			throws RateLimitException {
-		return getLatestVideos(dbCon, AbstractPlatform.getPlatformFromConfig(p), channelIdentifier);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, p);
+		return getLatestVideos(dbCon, AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform), channelIdentifier);
 	}
 
-	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, AbstractPlatform ap,
+	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, AbstractVideoPlatform ap,
 			String channelIdentifier) throws RateLimitException {
 		return getLatestVideos(dbCon, ap, channelIdentifier, 100);
 	}
 
-	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, AbstractPlatform ap,
+	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, AbstractVideoPlatform ap,
 			String channelIdentifier, int limit) throws RateLimitException {
 
 		List<PlatformVideo> videos = ap.getLatestVideos(channelIdentifier, limit);
@@ -263,15 +279,16 @@ public class PlatformVideo {
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, int platformId, String channelIdentifier,
 			int amount) throws RateLimitException {
 
-		Platform p = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform p = VideoPlatform.getPlatformById(dbCon, platformId);
 
-		AbstractPlatform ap = AbstractPlatform.getPlatformFromConfig(p);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, p);
+		AbstractVideoPlatform ap = AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform);
 
 		return ap.getLatestVideos(channelIdentifier, amount);
 	}
 
 	public HtmlGenericDiv renderPreview(DatabaseConnector dbCon) throws RateLimitException {
-		Platform p = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform p = VideoPlatform.getPlatformById(dbCon, platformId);
 
 		HtmlGenericDiv div = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_PREVIEW);
 
@@ -288,7 +305,8 @@ public class PlatformVideo {
 
 		HtmlGenericDiv channelDiv = new HtmlGenericDiv("", HtmlStyleConstants.DIV_CLASS_VIDEO_CHANNEL_LINK);
 
-		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(p);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, p);
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform);
 
 		channelDiv.writeLink(ViewChannel.LOCATION + "?" + ViewChannel.GET_PARAM_CHANNEL_ID + "=" + p.getKey() + "_"
 				+ channelIdentifier, abPlat.getCachedChannelName(channelIdentifier));
@@ -298,9 +316,10 @@ public class PlatformVideo {
 	}
 
 	public String getOriginalVideoLink(DatabaseConnector dbCon) {
-		Platform p = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform p = VideoPlatform.getPlatformById(dbCon, platformId);
 
-		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(p);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, p);
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform);
 
 		return abPlat.getOriginalVideoLink(this);
 	}

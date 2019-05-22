@@ -21,7 +21,7 @@ import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlStyleConstants;
 import co.clund.submodule.video.dbmodel.ExternalSubscription;
 import co.clund.submodule.video.dbmodel.InternalSubscription;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.submodule.video.dbmodel.Video;
 import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.util.cache.DynamicAsyncExpiringCache;
@@ -76,7 +76,7 @@ public class SubscriptionHelper {
 			String platformKey = channelKey.substring(0, channelKey.indexOf("_"));
 			String channelIdentifier = channelKey.substring(channelKey.indexOf("_") + 1);
 
-			Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+			VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
 
 			this.setupFutureTask(channelIdentifier, plat, videosFutureList);
 		}
@@ -107,7 +107,7 @@ public class SubscriptionHelper {
 		for (ExternalSubscription exSub : ExternalSubscription.getExternalSubscriptionByUserId(dbCon,
 				thisUser.getId())) {
 
-			String channelKey = Platform.getPlatformById(dbCon, exSub.getPlatformId()).getKey() + "_"
+			String channelKey = VideoPlatform.getPlatformById(dbCon, exSub.getPlatformId()).getKey() + "_"
 					+ exSub.getChannelIdentifier();
 			List<PlatformVideo> tmpList = videoCache.retrieve(channelKey);
 			if (tmpList != null) {
@@ -117,7 +117,7 @@ public class SubscriptionHelper {
 
 			String channelIdentifier = exSub.getChannelIdentifier();
 
-			Platform plat = Platform.getPlatformById(dbCon, exSub.getPlatformId());
+			VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, exSub.getPlatformId());
 
 			setupFutureTask(channelIdentifier, plat, videosFutureList);
 		}
@@ -125,7 +125,7 @@ public class SubscriptionHelper {
 		return assembleOrderedVideoDivList(subMap, videosFutureList, cachedVideosList);
 	}
 
-	private void setupFutureTask(String channelIdentifier, Platform plat,
+	private void setupFutureTask(String channelIdentifier, VideoPlatform plat,
 			List<Future<List<PlatformVideo>>> videosFutureList) {
 		FutureTask<List<PlatformVideo>> futureTask = new FutureTask<>(new Callable<List<PlatformVideo>>() {
 			@Override

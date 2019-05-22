@@ -17,7 +17,7 @@ import co.clund.html.HtmlForm.Method;
 import co.clund.html.HtmlTable.HtmlTableRow;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 
 public class EditPlatform extends AbstractModule {
 
@@ -47,17 +47,18 @@ public class EditPlatform extends AbstractModule {
 
 		HtmlTable platformTable = new HtmlTable();
 
-		platformTable.addHeader(Arrays.asList("id", "key", "name", "type", "edit"));
+		platformTable.addHeader(Arrays.asList("id", "key", "name", "type", "OAuth2 platform id", "edit"));
 
 		platformTable.startBody();
 
-		for (Platform plat : Platform.getAllPlatform(dbCon)) {
+		for (VideoPlatform plat : VideoPlatform.getAllPlatform(dbCon)) {
 			HtmlTableRow row = platformTable.new HtmlTableRow();
 
 			row.writeText(plat.getId() + "");
 			row.writeText(plat.getKey());
 			row.writeText(plat.getName());
 			row.writeText(plat.getType());
+			row.writeText(plat.getOauth2PlatId() + "");
 
 			HtmlForm editPlatformForm = new HtmlForm(LOCATION, Method.GET);
 			editPlatformForm.addHiddenElement(GET_PARAM_EDIT, GET_PARAM_VALUE_PLATFORM);
@@ -74,13 +75,14 @@ public class EditPlatform extends AbstractModule {
 
 		if (!parameters.containsKey(GET_PARAM_EDIT) || (parameters.get(GET_PARAM_EDIT) == null)) {
 
-			p.writeH2("Add new Platform");
+			p.writeH2("Add new VideoPlatform");
 
 			HtmlForm addPlatF = new HtmlForm(LOCATION + "." + FUNCTION_NAME_ADD, Method.POST);
 
-			addPlatF.addTextElement("Key", Platform.DB_TABLE_COLUMN_NAME_KEY, "");
-			addPlatF.addTextElement("Name", Platform.DB_TABLE_COLUMN_NAME_NAME, "");
-			addPlatF.addTextElement("Type", Platform.DB_TABLE_COLUMN_NAME_TYPE, "");
+			addPlatF.addTextElement("Key", VideoPlatform.DB_TABLE_COLUMN_NAME_KEY, "");
+			addPlatF.addTextElement("Name", VideoPlatform.DB_TABLE_COLUMN_NAME_NAME, "");
+			addPlatF.addTextElement("Type", VideoPlatform.DB_TABLE_COLUMN_NAME_TYPE, "");
+			addPlatF.addTextElement("OAuth2 platform id", VideoPlatform.DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID, "");
 			addPlatF.addSubmit("Edit", ButtonType.WARNING);
 
 			p.write(addPlatF);
@@ -94,17 +96,19 @@ public class EditPlatform extends AbstractModule {
 
 				int id = Integer.parseInt(parameters.get(AbstractDbTable.DB_TABLE_COLUMN_NAME_ID)[0]);
 
-				Platform plat = Platform.getPlatformById(dbCon, id);
+				VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, id);
 
 				p.writeH2("Edit platform " + plat.getName());
 
 				HtmlForm editPlatF = new HtmlForm(LOCATION + "." + FUNCTION_NAME_EDIT, Method.POST);
 
 				editPlatF.addHiddenElement(AbstractDbTable.DB_TABLE_COLUMN_NAME_ID, plat.getId() + "");
-				editPlatF.addTextElement("Key", Platform.DB_TABLE_COLUMN_NAME_KEY, plat.getKey());
-				editPlatF.addTextElement("Name", Platform.DB_TABLE_COLUMN_NAME_NAME, plat.getName());
-				editPlatF.addTextElement("Type", Platform.DB_TABLE_COLUMN_NAME_TYPE, plat.getType());
-				editPlatF.addTextArea(Platform.DB_TABLE_COLUMN_NAME_CONFIG, plat.getConfig().toString(4), 40, 40);
+				editPlatF.addTextElement("Key", VideoPlatform.DB_TABLE_COLUMN_NAME_KEY, plat.getKey());
+				editPlatF.addTextElement("Name", VideoPlatform.DB_TABLE_COLUMN_NAME_NAME, plat.getName());
+				editPlatF.addTextElement("Type", VideoPlatform.DB_TABLE_COLUMN_NAME_TYPE, plat.getType());
+				editPlatF.addTextElement("OAuth2 platform id", VideoPlatform.DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID,
+						plat.getOauth2PlatId() + "");
+				editPlatF.addTextArea(VideoPlatform.DB_TABLE_COLUMN_NAME_CONFIG, plat.getConfig().toString(4), 40, 40);
 				editPlatF.addSubmit("Edit", ButtonType.WARNING);
 
 				p.write(editPlatF);
@@ -139,11 +143,13 @@ public class EditPlatform extends AbstractModule {
 			return new FunctionResult(FunctionResult.Status.FAILED, getModuleName(), "not logged in");
 		}
 
-		String key = parameters.get(Platform.DB_TABLE_COLUMN_NAME_KEY)[0];
-		String pname = parameters.get(Platform.DB_TABLE_COLUMN_NAME_NAME)[0];
-		String type = parameters.get(Platform.DB_TABLE_COLUMN_NAME_TYPE)[0];
+		String key = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_KEY)[0];
+		String pname = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_NAME)[0];
+		String type = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_TYPE)[0];
+		int oAuth2PlatId = new Integer(parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID)[0])
+				.intValue();
 
-		Platform.addNewPlatform(dbCon, key, pname, type);
+		VideoPlatform.addNewPlatform(dbCon, key, pname, type, oAuth2PlatId);
 
 		return new FunctionResult(FunctionResult.Status.OK, getModuleName());
 	}
@@ -157,14 +163,16 @@ public class EditPlatform extends AbstractModule {
 		}
 
 		int platformId = Integer.parseInt(parameters.get(AbstractDbTable.DB_TABLE_COLUMN_NAME_ID)[0]);
-		String key = parameters.get(Platform.DB_TABLE_COLUMN_NAME_KEY)[0];
-		String pname = parameters.get(Platform.DB_TABLE_COLUMN_NAME_NAME)[0];
-		String type = parameters.get(Platform.DB_TABLE_COLUMN_NAME_TYPE)[0];
-		String config = parameters.get(Platform.DB_TABLE_COLUMN_NAME_CONFIG)[0];
+		String key = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_KEY)[0];
+		String pname = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_NAME)[0];
+		String type = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_TYPE)[0];
+		String config = parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_CONFIG)[0];
+		int oAuth2PlatId = new Integer(parameters.get(VideoPlatform.DB_TABLE_COLUMN_NAME_OAUHT2_PLATFORM_ID)[0])
+				.intValue();
 
-		Platform plat = Platform.getPlatformById(dbCon, platformId);
+		VideoPlatform plat = VideoPlatform.getPlatformById(dbCon, platformId);
 
-		plat.edit(dbCon, key, pname, type, config);
+		plat.edit(dbCon, key, pname, type, config, oAuth2PlatId);
 
 		return new FunctionResult(FunctionResult.Status.OK, getModuleName());
 	}

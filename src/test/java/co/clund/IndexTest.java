@@ -7,10 +7,11 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
+import co.clund.db.model.DBOAuth2Platform;
 import co.clund.db.model.User;
 import co.clund.module.Index;
 import co.clund.module.Video;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
 import co.clund.video.HttpTest;
@@ -32,11 +33,6 @@ public class IndexTest extends TestCase implements HttpTest {
 		MainHttpListener l = new MainHttpListener(jData);
 
 		DatabaseConnector.initializeDatabase(l.getDbCon());
-
-		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
-				.getJSONObject("credentials");
-
-		Platform.populateTestPlatforms(l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION), credentialData);
 
 		startHttpListener(l);
 
@@ -70,13 +66,18 @@ public class IndexTest extends TestCase implements HttpTest {
 
 		startHttpListener(l);
 
+		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
+				.getJSONObject("credentials");
+
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		Platform.populateTestPlatforms(submoduleConnector, getTestCredentials().getJSONObject("credentials"));
+		DBOAuth2Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+
+		VideoPlatform.addNewPlatform(submoduleConnector, "yt01", "Youtube", "youtube", 1);
+		VideoPlatform.addNewPlatform(submoduleConnector, "vi01", "Vimeo", "vimeo", 2);
 
 		User.addNewLocalUser(l.getDbCon(), "testUser1", "asdf1234", "test@clund.co", false);
 
-		httpRequestAsUser("testUser1", "asdf1234", baseUrl,
-				baseUrl + "/" + Index.INDEX_LOCATION);
+		httpRequestAsUser("testUser1", "asdf1234", baseUrl, baseUrl + "/" + Index.INDEX_LOCATION);
 
 	}
 

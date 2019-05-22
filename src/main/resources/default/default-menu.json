@@ -1,5 +1,12 @@
 [
 	{
+		"name"    : "Home",
+		"type"    : "manual-highlight",
+		"active-for" : [],
+		"link"    : "/",
+		"submenu" : []
+	},
+	{
 		"name"    : "Forum",
 		"type"    : "submenu",
 		"module"  : "forum",
@@ -26,7 +33,7 @@
 		"submenu" : []
 	},
 	{
-		"name"    : "Profile &amp; Settings",
+		"name"    : "Profile & Settings",
 		"type"    : "manual-highlight",
 		"active-for" : ["/profile", "/settings"],
 		"link"    : "/profile",

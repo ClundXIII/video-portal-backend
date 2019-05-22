@@ -16,10 +16,11 @@ import org.json.JSONObject;
 
 import co.clund.db.DatabaseConnector;
 import co.clund.html.HtmlGenericDiv;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.HttpRequestUtil;
 
-public class VimeoPlatform extends AbstractPlatform {
+public class VimeoPlatform extends AbstractVideoPlatform {
 
 	private final static String API_URL = "https://api.vimeo.com/";
 
@@ -31,12 +32,12 @@ public class VimeoPlatform extends AbstractPlatform {
 
 	private final String apiKey;
 
-	public VimeoPlatform(Platform platform) {
-		super(platform);
+	public VimeoPlatform(VideoPlatform platform, AbstractOAuth2UserPlatform oAuth2UserPlatform) {
+		super(platform, oAuth2UserPlatform);
 
 		String tmpApiKey = null;
 		try {
-			JSONObject config = platform.getConfig();
+			JSONObject config = oAuth2UserPlatform.getdBOAuth2Platform().getConfig();
 
 			tmpApiKey = Base64.getEncoder().encodeToString(
 					(config.getString("client_id") + ":" + config.getString("client_secret")).getBytes());
@@ -219,36 +220,6 @@ public class VimeoPlatform extends AbstractPlatform {
 
 		return new JSONObject(
 				new String(HttpRequestUtil.httpGetRequestWithHeader(scriptLocation, new HashMap<>(), headerParams)));
-	}
-
-	@Override
-	public long getClientCredentialsExpirationTime() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String getClientCredentialsFromCallback(Map<String, String> callBackData) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String renewClientCredentials(String clientCredentials) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void revokeClientCredentials(String clientCredentials) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

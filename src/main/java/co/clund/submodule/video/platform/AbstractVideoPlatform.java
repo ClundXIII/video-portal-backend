@@ -16,34 +16,35 @@ import org.reflections.Reflections;
 import co.clund.db.DatabaseConnector;
 import co.clund.exception.RateLimitException;
 import co.clund.html.HtmlGenericDiv;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.cache.DynamicAsyncExpiringCache;
 import co.clund.util.log.LoggingUtil;
 
-public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection */ {
+public abstract class AbstractVideoPlatform {
 
 	public static final String REMOTE_LOCATION_CONFIG_KEY_TYPE = "type";
 	// public static final String UNIQUE_ID_KEY = "uniqueId";
 
-	private static final Map<String, Class<? extends AbstractPlatform>> allAbstractPlatform = loadAbstractPlatform();
+	private static final Map<String, Class<? extends AbstractVideoPlatform>> allAbstractPlatform = loadAbstractPlatform();
 
 	protected final Logger logger = LoggingUtil.getDefaultLogger();
 
-	private static Map<String, Class<? extends AbstractPlatform>> loadAbstractPlatform() {
+	private static Map<String, Class<? extends AbstractVideoPlatform>> loadAbstractPlatform() {
 
 		Logger logger = LoggingUtil.getDefaultLogger();
 
-		Map<String, Class<? extends AbstractPlatform>> reMap = new HashMap<>();
+		Map<String, Class<? extends AbstractVideoPlatform>> reMap = new HashMap<>();
 
 		Reflections reflections = new Reflections("co.clund.submodule.video.platform");
-		Set<Class<? extends AbstractPlatform>> allClasses = reflections.getSubTypesOf(AbstractPlatform.class);
+		Set<Class<? extends AbstractVideoPlatform>> allClasses = reflections.getSubTypesOf(AbstractVideoPlatform.class);
 
-		for (Class<? extends AbstractPlatform> c : allClasses) {
-			logger.log(Level.INFO, "loading abstract Platform class " + c.getName());
+		for (Class<? extends AbstractVideoPlatform> c : allClasses) {
+			logger.log(Level.INFO, "loading abstract VideoPlatform class " + c.getName());
 			String name = null;
 			try {
-				Constructor<? extends AbstractPlatform> cons = c.getConstructor(Platform.class);
-				AbstractPlatform r = cons.newInstance(new Object[] { null });
+				Constructor<? extends AbstractVideoPlatform> cons = c.getConstructor(VideoPlatform.class, AbstractOAuth2UserPlatform.class);
+				AbstractVideoPlatform r = cons.newInstance(new Object[] { null, null });
 				name = r.getPlatformTypeName();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -56,40 +57,18 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 		return reMap;
 	}
 
-	static List<AbstractPlatform> getAllAbstractPlatform() {
-
-		List<AbstractPlatform> retList = new ArrayList<>();
-
-		Reflections reflections = new Reflections("co.clund.submodule.video.platform");
-
-		Set<Class<? extends AbstractPlatform>> allClasses = reflections.getSubTypesOf(AbstractPlatform.class);
-
-		for (Class<? extends AbstractPlatform> c : allClasses) {
-			try {
-				Constructor<? extends AbstractPlatform> cons = c.getConstructor(Platform.class);
-				AbstractPlatform m = cons.newInstance(new Object[] { null });
-
-				retList.add(m);
-
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-
-		}
-
-		return retList;
-	}
-
-	public static AbstractPlatform getPlatformFromConfig(Platform stor) {
-		Class<? extends AbstractPlatform> c = allAbstractPlatform.get(stor.getType());
+	public static AbstractVideoPlatform getPlatformFromConfig(VideoPlatform stor,
+			AbstractOAuth2UserPlatform oAuth2UserPlatform) {
+		Class<? extends AbstractVideoPlatform> c = allAbstractPlatform.get(stor.getType());
 		Logger logger = LoggingUtil.getDefaultLogger();
 
 		try {
-			Constructor<? extends AbstractPlatform> cons = c.getConstructor(Platform.class);
+			Constructor<? extends AbstractVideoPlatform> cons = c.getConstructor(VideoPlatform.class,
+					AbstractOAuth2UserPlatform.class);
 
-			return cons.newInstance(new Object[] { stor });
+			return cons.newInstance(new Object[] { stor, oAuth2UserPlatform });
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "error while creating AbstractPlatform: " + e.getMessage());
+			logger.log(Level.SEVERE, "error while creating AbstractVideoPlatform: " + e.getMessage());
 			logger.log(Level.SEVERE, "caused by");
 			e.printStackTrace();
 			return null;
@@ -102,13 +81,15 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 		return retList;
 	}
 
-	protected final Platform platform;
+	protected final VideoPlatform platform;
+	protected final AbstractOAuth2UserPlatform oAuth2UserPlatform;
 
-	AbstractPlatform(Platform platform) {
+	AbstractVideoPlatform(VideoPlatform platform, AbstractOAuth2UserPlatform oAuth2UserPlatform) {
 		this.platform = platform;
+		this.oAuth2UserPlatform = oAuth2UserPlatform;
 	}
 
-	Platform getPlatform() {
+	VideoPlatform getPlatform() {
 		return platform;
 	}
 
@@ -205,19 +186,6 @@ public abstract class AbstractPlatform /* extends AbstractCachedQueryConnection 
 
 	// Management functions
 
-	/**
-	 * @return how long until client credentials need to be renewed (in seconds)
-	 */
-	public abstract long getClientCredentialsExpirationTime();
-
-	public abstract URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon);
-
 	public abstract URIBuilder getClientCredentialsUploadRequestBuilder(DatabaseConnector dbCon);
-
-	public abstract String getClientCredentialsFromCallback(Map<String, String> callBackData);
-
-	public abstract String renewClientCredentials(String clientCredentials);
-
-	public abstract void revokeClientCredentials(String clientCredentials);
 
 }

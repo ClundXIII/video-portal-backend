@@ -8,10 +8,13 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
+import co.clund.db.model.DBOAuth2Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.module.Video;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.oauth2.VimeoOAuth2Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.submodule.video.platform.VimeoPlatform;
 import co.clund.util.ResourceUtil;
@@ -40,15 +43,20 @@ public class VimeoTest extends TestCase implements HttpTest {
 				.getJSONObject("credentials");
 
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		Platform.populateTestPlatforms(submoduleConnector, credentialData);
 
 		final JSONObject vimeoCredentials = credentialData.getJSONObject("vimeo");
 
-		Platform plat = new Platform(1, "test_vi", "Test Vimeo", "vimeo",
-				"{\"client_id\":\"" + vimeoCredentials.getString("client_id") + "\",\"client_secret\":\""
-						+ vimeoCredentials.getString("client_secret") + "\"}");
+		AbstractOAuth2UserPlatform oauth2Plat = new VimeoOAuth2Platform(
+				new DBOAuth2Platform(1, "test_vi", "Test Vimeo", "vimeo",
+						"{\"client_id\":\"" + vimeoCredentials.getString("client_id") + "\",\"client_secret\":\""
+								+ vimeoCredentials.getString("client_secret") + "\"}"));
 
-		AbstractPlatform yP = new VimeoPlatform(plat);
+		VideoPlatform plat = new VideoPlatform(1, "test_vi", "Test Vimeo", "vimeo",
+				"{}", 1);
+
+		VideoPlatform.addNewPlatform(submoduleConnector, "test_vi", "Test Vimeo", "vimeo", 1);
+
+		AbstractVideoPlatform yP = new VimeoPlatform(plat, oauth2Plat);
 
 		final String channelId = yP.getChannelIdentifierFromUrl("https://vimeo.com/wolkemedia");
 		final String videoId = "200837662";

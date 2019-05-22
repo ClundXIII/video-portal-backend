@@ -8,8 +8,9 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
+import co.clund.db.model.DBOAuth2Platform;
 import co.clund.module.Video;
-import co.clund.submodule.video.dbmodel.Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.util.RandomUtil;
 import co.clund.util.ResourceUtil;
 import co.clund.util.log.LoggingUtil;
@@ -40,7 +41,10 @@ public class AppTest extends TestCase implements HttpTest {
 				.getJSONObject("credentials");
 
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		Platform.populateTestPlatforms(submoduleConnector, credentialData);
+		DBOAuth2Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+		
+		VideoPlatform.addNewPlatform(submoduleConnector, "yt01", "Youtube", "youtube", 1);		
+		VideoPlatform.addNewPlatform(submoduleConnector, "vi01", "Vimeo", "vimeo", 2);
 
 		startHttpListener(l);
 

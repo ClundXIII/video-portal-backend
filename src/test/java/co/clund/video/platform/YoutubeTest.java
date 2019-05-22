@@ -8,10 +8,13 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
+import co.clund.db.model.DBOAuth2Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.module.Video;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.oauth2.YoutubeOAuth2Platform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.submodule.video.platform.YoutubePlatform;
 import co.clund.util.ResourceUtil;
@@ -40,12 +43,16 @@ public class YoutubeTest extends TestCase implements HttpTest {
 				.getJSONObject("credentials");
 
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		Platform.populateTestPlatforms(submoduleConnector, credentialData);
 
-		Platform plat = new Platform(1, "test_yt", "Test Youtube", "youtube",
-				"{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}");
+		AbstractOAuth2UserPlatform oauth2Plat = new YoutubeOAuth2Platform(
+				new DBOAuth2Platform(1, "test_yt", "Test Youtube", "youtube",
+						"{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}"));
 
-		AbstractPlatform yP = new YoutubePlatform(plat);
+		VideoPlatform plat = new VideoPlatform(1, "test_yt", "Test Youtube", "youtube", "{}", 1);
+
+		VideoPlatform.addNewPlatform(submoduleConnector, "test_yt", "Test Youtube", "youtube", 1);
+		
+		AbstractVideoPlatform yP = new YoutubePlatform(plat, oauth2Plat);
 
 		final String channelId = yP.getChannelIdentifierFromUrl("https://www.youtube.com/user/ExplosmEntertainment");
 		final String videoId = "3vuMI9YakqI";

@@ -13,8 +13,9 @@ import co.clund.html.HtmlGenericDiv;
 import co.clund.html.HtmlPage;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.submodule.video.subscription.SubscriptionHelper;
 
@@ -40,9 +41,10 @@ public class ViewChannel extends AbstractModule {
 
 		String id = parameters.get(GET_PARAM_CHANNEL_ID)[0];
 
-		Platform plat = Platform.getPlatformByKey(dbCon, id.substring(0, id.indexOf("_")));
+		VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, id.substring(0, id.indexOf("_")));
 
-		AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon, plat);
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
 
 		String channelIdentifier = id.substring(id.indexOf("_") + 1);
 

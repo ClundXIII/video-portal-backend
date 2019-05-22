@@ -28,8 +28,10 @@ import co.clund.html.HtmlTable.HtmlTableRow;
 import co.clund.module.AbstractModule;
 import co.clund.module.FunctionResult;
 import co.clund.module.FunctionResult.Status;
-import co.clund.submodule.video.dbmodel.Platform;
-import co.clund.submodule.video.platform.AbstractPlatform;
+import co.clund.oauth2.AbstractOAuth2UserPlatform;
+import co.clund.submodule.video.dbmodel.VideoPlatform;
+import co.clund.submodule.video.platform.AbstractVideoPlatform;
+import co.clund.submodule.video.platform.PlatformVideo;
 import co.clund.submodule.video.subscription.SubscriptionHelper;
 
 public class LinkOnlySubscription extends AbstractModule {
@@ -93,9 +95,10 @@ public class LinkOnlySubscription extends AbstractModule {
 				String platformKey = channelKey.substring(0, channelKey.indexOf("_"));
 				String channelIdentifier = channelKey.substring(channelKey.indexOf("_") + 1);
 
-				Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+				VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
 
-				AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+				AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon, plat);
+				AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
 
 				try {
 					thisRow.writeLink(abPlat.getOriginalChannelLink(channelIdentifier),
@@ -170,7 +173,7 @@ public class LinkOnlySubscription extends AbstractModule {
 
 			String platformKey = null;
 
-			for (Entry<Pattern, String> regExpEntry : Platform.getPlatformRegExps(dbCon).entrySet()) {
+			for (Entry<Pattern, String> regExpEntry : VideoPlatform.getPlatformRegExps(dbCon).entrySet()) {
 				System.out.println("trying " + regExpEntry.getKey().pattern());
 				if (regExpEntry.getKey().matcher(channelUrl).find()) {
 					platformKey = regExpEntry.getValue();
@@ -183,9 +186,10 @@ public class LinkOnlySubscription extends AbstractModule {
 				return new FunctionResult(FunctionResult.Status.FAILED, getModuleName(), "cannot detect platform!");
 			}
 
-			Platform plat = Platform.getPlatformByKey(dbCon, platformKey);
+			VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
 
-			AbstractPlatform abPlat = AbstractPlatform.getPlatformFromConfig(plat);
+			AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = PlatformVideo.getOAuth2PlatformIfNeeded(dbCon, plat);
+			AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
 
 			String channelIdentifier = abPlat.getChannelIdentifierFromUrl(channelUrl);
 
