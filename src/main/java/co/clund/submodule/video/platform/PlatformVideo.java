@@ -179,9 +179,10 @@ public class PlatformVideo {
 	}
 
 	public static AbstractOAuth2UserPlatform getOAuth2PlatformIfNeeded(DatabaseConnector dbCon, VideoPlatform plat) {
-		if (plat.getOauth2PlatId() > 0) {		
-			DBOAuth2Platform dBAuth2Plat = DBOAuth2Platform.getPlatformById(dbCon, plat.getOauth2PlatId());
-	
+		if (plat.getOauth2PlatId() > 0) {
+			DBOAuth2Platform dBAuth2Plat = DBOAuth2Platform.getPlatformById(dbCon.getRootDbCon(),
+					plat.getOauth2PlatId());
+
 			return AbstractOAuth2UserPlatform.getAbstractOAuth2UserPlatformFromType(dBAuth2Plat);
 		}
 		return null;
@@ -193,7 +194,7 @@ public class PlatformVideo {
 		String videoIdent = fullVideoKey.substring(fullVideoKey.indexOf("_") + 1);
 
 		VideoPlatform plat = VideoPlatform.getPlatformByKey(dbCon, platformKey);
-		
+
 		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, plat);
 
 		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(plat, abstractOAuth2UserPlatform);
@@ -209,8 +210,9 @@ public class PlatformVideo {
 		VideoPlatform platform = VideoPlatform.getPlatformById(dbCon, platformId);
 
 		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, platform);
-		
-		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(platform,abstractOAuth2UserPlatform);
+
+		AbstractVideoPlatform abPlat = AbstractVideoPlatform.getPlatformFromConfig(platform,
+				abstractOAuth2UserPlatform);
 
 		return abPlat.renderVideo(this);
 	}
@@ -223,10 +225,11 @@ public class PlatformVideo {
 		return getLatestVideos(dbCon, p, channelIdentifier);
 	}
 
-	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, VideoPlatform p, String channelIdentifier)
-			throws RateLimitException {
+	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, VideoPlatform p,
+			String channelIdentifier) throws RateLimitException {
 		AbstractOAuth2UserPlatform abstractOAuth2UserPlatform = getOAuth2PlatformIfNeeded(dbCon, p);
-		return getLatestVideos(dbCon, AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform), channelIdentifier);
+		return getLatestVideos(dbCon, AbstractVideoPlatform.getPlatformFromConfig(p, abstractOAuth2UserPlatform),
+				channelIdentifier);
 	}
 
 	public static List<PlatformVideo> getLatestVideos(DatabaseConnector dbCon, AbstractVideoPlatform ap,
