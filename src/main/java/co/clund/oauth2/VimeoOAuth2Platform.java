@@ -1,5 +1,6 @@
 package co.clund.oauth2;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -36,7 +37,7 @@ public class VimeoOAuth2Platform extends AbstractOAuth2UserPlatform {
 	}
 
 	@Override
-	public String getClientCredentialsFromCallback(Map<String, String> callBackData) {
+	public TokenData getClientCredentialsFromCallback(DatabaseConnector dbCon, Map<String, String[]> callBackData) {
 		// TODO Auto-generated method stub
 		return null;
 	}

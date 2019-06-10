@@ -2,7 +2,7 @@ package co.clund.oauth2;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import co.clund.util.TriFunction;
 
 import co.clund.UserSession;
 
@@ -11,14 +11,14 @@ public class OAuth2CallbackHandler {
 	public OAuth2CallbackHandler() {
 	}
 
-	Map<String, BiFunction<UserSession, Map<String, String[]>, String>> stateCallbackMap = new HashMap<>();
+	Map<String, TriFunction<String, UserSession, Map<String, String[]>, String>> stateCallbackMap = new HashMap<>();
 
-	public void insertCallback(String state, BiFunction<UserSession, Map<String, String[]>, String> callback) {
+	public void insertCallback(String state, TriFunction<String, UserSession, Map<String, String[]>, String> callback) {
 		stateCallbackMap.put(state, callback);
 	}
 
-	public String call(String state, UserSession s, Map<String, String[]> parameters) {
-		return stateCallbackMap.get(state).apply(s, parameters);
+	public String call(String state, String platKey, UserSession s, Map<String, String[]> parameters) {
+		return stateCallbackMap.get(state).apply(platKey, s, parameters);
 	}
 
 }

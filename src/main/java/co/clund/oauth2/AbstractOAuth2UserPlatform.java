@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.time.Duration;
+
 import org.apache.http.client.utils.URIBuilder;
 import org.reflections.Reflections;
 
@@ -15,6 +17,18 @@ import co.clund.db.model.DBOAuth2Platform;
 import co.clund.util.log.LoggingUtil;
 
 public abstract class AbstractOAuth2UserPlatform {
+
+	public class TokenData {
+		public final String token;
+		public final Duration validDuration;
+		public final String refreshToken;
+
+		TokenData(String token, Duration validDuration, String refreshToken) {
+			this.token = token;
+			this.validDuration = validDuration;
+			this.refreshToken = refreshToken;
+		}
+	}
 
 	protected final Logger logger = LoggingUtil.getDefaultLogger();
 
@@ -39,8 +53,7 @@ public abstract class AbstractOAuth2UserPlatform {
 			logger.log(Level.INFO, "loading abstract AbstractOAuth2UserPlatform class " + c.getName());
 			String name = null;
 			try {
-				Constructor<? extends AbstractOAuth2UserPlatform> cons = c
-						.getConstructor(DBOAuth2Platform.class);
+				Constructor<? extends AbstractOAuth2UserPlatform> cons = c.getConstructor(DBOAuth2Platform.class);
 				AbstractOAuth2UserPlatform r = cons.newInstance(new Object[] { null });
 				name = r.getPlatformTypeName();
 			} catch (Exception e) {
@@ -82,7 +95,8 @@ public abstract class AbstractOAuth2UserPlatform {
 
 	public abstract URIBuilder getScopelessClientCredentialsRequestBuilder(DatabaseConnector dbCon);
 
-	public abstract String getClientCredentialsFromCallback(Map<String, String> callBackData);
+	public abstract TokenData getClientCredentialsFromCallback(DatabaseConnector dbCon,
+			Map<String, String[]> parameters);
 
 	public abstract String renewClientCredentials(String clientCredentials);
 
