@@ -37,7 +37,7 @@ public class YoutubePlatform extends AbstractVideoPlatform {
 		super(platform, oAuth2UserPlatform);
 		String tmpApiKey = null;
 		try {
-			tmpApiKey = oAuth2UserPlatform.getdBOAuth2Platform().getConfig().getString("api_key");
+			tmpApiKey = platform.getConfig().getString("api_key");
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Error while initializing Youtube platform: " + e.getMessage());
 		}

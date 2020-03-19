@@ -8,11 +8,8 @@ import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
 import co.clund.db.DatabaseConnector;
-import co.clund.db.model.DBOAuth2Platform;
 import co.clund.exception.RateLimitException;
 import co.clund.module.Video;
-import co.clund.oauth2.AbstractOAuth2UserPlatform;
-import co.clund.oauth2.VimeoOAuth2Platform;
 import co.clund.submodule.video.dbmodel.VideoPlatform;
 import co.clund.submodule.video.platform.AbstractVideoPlatform;
 import co.clund.submodule.video.platform.PlatformVideo;
@@ -40,23 +37,20 @@ public class VimeoTest extends TestCase implements HttpTest {
 		DatabaseConnector.initializeDatabase(l.getDbCon());
 
 		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
-				.getJSONObject("credentials");
+				.getJSONObject("video-platform-credentials");
 
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
 
 		final JSONObject vimeoCredentials = credentialData.getJSONObject("vimeo");
 
-		AbstractOAuth2UserPlatform oauth2Plat = new VimeoOAuth2Platform(
-				new DBOAuth2Platform(1, "test_vi", "Test Vimeo", "vimeo",
-						"{\"client_id\":\"" + vimeoCredentials.getString("client_id") + "\",\"client_secret\":\""
-								+ vimeoCredentials.getString("client_secret") + "\"}"));
-
 		VideoPlatform plat = new VideoPlatform(1, "test_vi", "Test Vimeo", "vimeo",
-				"{}", 1);
+				"{\"client_id\":\"" + vimeoCredentials.getString("client_id") + "\",\"client_secret\":\""
+						+ vimeoCredentials.getString("client_secret") + "\"}",
+				1);
 
 		VideoPlatform.addNewPlatform(submoduleConnector, "test_vi", "Test Vimeo", "vimeo", 1);
 
-		AbstractVideoPlatform yP = new VimeoPlatform(plat, oauth2Plat);
+		AbstractVideoPlatform yP = new VimeoPlatform(plat, null);
 
 		final String channelId = yP.getChannelIdentifierFromUrl("https://vimeo.com/wolkemedia");
 		final String videoId = "200837662";

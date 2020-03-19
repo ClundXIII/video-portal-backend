@@ -1,13 +1,12 @@
 package co.clund.oauth2;
 
 import java.lang.reflect.Constructor;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.time.Duration;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.reflections.Reflections;
@@ -19,14 +18,16 @@ import co.clund.util.log.LoggingUtil;
 public abstract class AbstractOAuth2UserPlatform {
 
 	public class TokenData {
-		public final String token;
-		public final Duration validDuration;
+		public final String accessToken;
+		public final Date accessTokenExpires;
 		public final String refreshToken;
+		public final Date refreshTokenExpires;
 
-		TokenData(String token, Duration validDuration, String refreshToken) {
-			this.token = token;
-			this.validDuration = validDuration;
+		TokenData(String accessToken, Date accessTokenExpires, String refreshToken, Date refreshTokenExpires) {
+			this.accessToken = accessToken;
+			this.accessTokenExpires = accessTokenExpires;
 			this.refreshToken = refreshToken;
+			this.refreshTokenExpires = refreshTokenExpires;
 		}
 	}
 
@@ -89,7 +90,7 @@ public abstract class AbstractOAuth2UserPlatform {
 	/**
 	 * @return how long until client credentials need to be renewed (in seconds)
 	 */
-	public abstract long getClientCredentialsExpirationTime();
+	public abstract long getAccessTokenExpirationTime();
 
 	public abstract URIBuilder getClientCredentialsRequestBuilder(DatabaseConnector dbCon);
 
@@ -98,7 +99,7 @@ public abstract class AbstractOAuth2UserPlatform {
 	public abstract TokenData getClientCredentialsFromCallback(DatabaseConnector dbCon,
 			Map<String, String[]> parameters);
 
-	public abstract String renewClientCredentials(String clientCredentials);
+	public abstract TokenData renewClientCredentials(TokenData clientCredentials);
 
 	public abstract void revokeClientCredentials(String clientCredentials);
 

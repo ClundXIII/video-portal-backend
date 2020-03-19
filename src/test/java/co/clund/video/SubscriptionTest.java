@@ -6,9 +6,7 @@ import java.util.logging.Logger;
 import org.json.JSONObject;
 
 import co.clund.MainHttpListener;
-import co.clund.db.DatabaseConnector;
-import co.clund.db.model.DBOAuth2Platform;
-import co.clund.db.model.User;
+import co.clund.db.DatabaseConnector;import co.clund.db.model.User;
 import co.clund.module.Video;
 import co.clund.submodule.video.VideoIndex;
 import co.clund.submodule.video.dbmodel.ExternalSubscription;
@@ -36,10 +34,10 @@ public class SubscriptionTest extends TestCase implements HttpTest {
 		DatabaseConnector.initializeDatabase(l.getDbCon());
 
 		JSONObject credentialData = new JSONObject(ResourceUtil.getResourceAsString("/credentials.json"))
-				.getJSONObject("credentials");
+				.getJSONObject("video-platform-credentials");
 
 		final DatabaseConnector submoduleConnector = l.getDbCon().getSubmoduleConnector(Video.VIDEO_LOCATION);
-		DBOAuth2Platform.populateTestPlatforms(l.getDbCon(), credentialData);
+		VideoPlatform.populateTestPlatforms(submoduleConnector, credentialData);
 
 		VideoPlatform.addNewPlatform(submoduleConnector, "yt01", "Youtube", "youtube", 1);
 		VideoPlatform.addNewPlatform(submoduleConnector, "vi01", "Vimeo", "vimeo", 2);

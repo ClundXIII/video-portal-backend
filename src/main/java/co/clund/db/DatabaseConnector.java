@@ -204,7 +204,9 @@ public class DatabaseConnector {
 							break;
 
 						case TIMESTAMP:
-							tmpMap.put(e.getKey(), new DbValue(new Timestamp(rs.getLong(columnNumber))));
+							final long timestampMillis = rs.getLong(columnNumber);
+							final DbValue dbValue = timestampMillis > 0 ? new DbValue(new Timestamp(timestampMillis)) : null;
+							tmpMap.put(e.getKey(), dbValue);
 							break;
 
 						default:
@@ -223,7 +225,7 @@ public class DatabaseConnector {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
+		
 		return retList;
 	}
 
@@ -249,7 +251,8 @@ public class DatabaseConnector {
 				break;
 
 			case TIMESTAMP:
-				stmt.setLong(i, v.getTimestamp().getTime());
+				final long time = v.getTimestamp() == null ? -1 : v.getTimestamp().getTime();
+				stmt.setLong(i, time);
 				break;
 
 			default:

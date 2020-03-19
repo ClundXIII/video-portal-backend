@@ -1,6 +1,10 @@
 package co.clund.util;
 
+import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
@@ -54,4 +58,26 @@ public class ResourceUtil {
 		Reflections reflections = new Reflections(classPath, new ResourcesScanner());
 		return reflections.getResources(x -> true);
 	}
+
+	public static List<String> getResourceInFilepath(String filepath) {
+		File f = new File(filepath);
+
+		if (!f.exists()) {
+			LoggingUtil.getDefaultLogger().log(Level.WARNING, "file " + f.getAbsolutePath() + " does not exist!");
+			return new ArrayList<>();
+		}
+
+		if (!f.isDirectory()) {
+			return Arrays.asList(filepath);
+		}
+
+		List<String> subDirFiles = new ArrayList<>();
+
+		for (File f2 : f.listFiles()) {
+			subDirFiles.addAll(getResourceInFilepath(f2.getPath()));
+		}
+
+		return subDirFiles;
+	}
+
 }

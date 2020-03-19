@@ -37,7 +37,7 @@ public class VimeoPlatform extends AbstractVideoPlatform {
 
 		String tmpApiKey = null;
 		try {
-			JSONObject config = oAuth2UserPlatform.getdBOAuth2Platform().getConfig();
+			JSONObject config = platform.getConfig();
 
 			tmpApiKey = Base64.getEncoder().encodeToString(
 					(config.getString("client_id") + ":" + config.getString("client_secret")).getBytes());

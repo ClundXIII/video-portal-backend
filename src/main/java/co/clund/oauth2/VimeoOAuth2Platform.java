@@ -1,6 +1,5 @@
 package co.clund.oauth2;
 
-import java.time.Duration;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -20,8 +19,8 @@ public class VimeoOAuth2Platform extends AbstractOAuth2UserPlatform {
 	}
 
 	@Override
-	public long getClientCredentialsExpirationTime() {
-		return 30*60*60; // 30 hours; TODO: check what the correct time is!
+	public long getAccessTokenExpirationTime() {
+		return 30 * 60 * 60; // 30 hours; TODO: check what the correct time is!
 	}
 
 	@Override
@@ -43,7 +42,7 @@ public class VimeoOAuth2Platform extends AbstractOAuth2UserPlatform {
 	}
 
 	@Override
-	public String renewClientCredentials(String clientCredentials) {
+	public TokenData renewClientCredentials(TokenData clientCredentials) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -51,7 +50,7 @@ public class VimeoOAuth2Platform extends AbstractOAuth2UserPlatform {
 	@Override
 	public void revokeClientCredentials(String clientCredentials) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

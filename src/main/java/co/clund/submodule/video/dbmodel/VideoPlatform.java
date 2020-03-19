@@ -222,4 +222,22 @@ public class VideoPlatform extends AbstractDbTable {
 
 		return keyCache.get(key);
 	}
+
+	public static void populateTestPlatforms(DatabaseConnector dbCon, JSONObject credentialData) {
+		dbCon.insert(DB_TABLE_NAME,
+				Arrays.asList(DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_TYPE,
+						DB_TABLE_COLUMN_NAME_CONFIG),
+				Arrays.asList(new DbValue("Youtube"), new DbValue("yt01"), new DbValue("youtube"), new DbValue(
+						"{\"api_key\":\"" + credentialData.getJSONObject("youtube").getString("api_key") + "\"}")));
+
+		final JSONObject vimeoData = credentialData.getJSONObject("vimeo");
+		dbCon.insert(DB_TABLE_NAME,
+				Arrays.asList(DB_TABLE_COLUMN_NAME_NAME, DB_TABLE_COLUMN_NAME_KEY, DB_TABLE_COLUMN_NAME_TYPE,
+						DB_TABLE_COLUMN_NAME_CONFIG),
+				Arrays.asList(new DbValue("Vimeo"), new DbValue("vi01"), new DbValue("vimeo"),
+						new DbValue("{\"client_id\":\"" + vimeoData.getString("client_id") + "\","
+								+ "\"client_secret\":\"" + vimeoData.getString("client_secret") + "\"")));
+
+	}
+
 }

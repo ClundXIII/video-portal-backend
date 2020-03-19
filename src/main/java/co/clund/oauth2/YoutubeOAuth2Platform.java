@@ -1,6 +1,7 @@
 package co.clund.oauth2;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -22,10 +23,8 @@ public class YoutubeOAuth2Platform extends AbstractOAuth2UserPlatform {
 	}
 
 	@Override
-	public long getClientCredentialsExpirationTime() {
-		// it does not expire??
-		// https://stackoverflow.com/questions/7030694/why-do-access-tokens-expire
-		return -1;
+	public long getAccessTokenExpirationTime() {
+		return 3600;
 	}
 
 	@Override
@@ -72,16 +71,22 @@ public class YoutubeOAuth2Platform extends AbstractOAuth2UserPlatform {
 		parameters.put("redirect_uri", dbCon.getListener().getSiteUrl() + "/oauth2.callback");
 		parameters.put("grant_type", "authorization_code");
 
+		JSONObject refreshData = null;
 		try {
-			JSONObject refreshData = new JSONObject(
+			refreshData = new JSONObject(
 					HttpRequestUtil.httpPostRequestAsString(TOKEN_VERIFY_ENTRY, parameters));
 
 			System.out.println(refreshData.toString(4));
 
 			String accessToken = refreshData.getString("access_token");
 			Duration dur = Duration.ofSeconds(refreshData.getInt("expires_in"));
+			Date accessTokenExpires = new Date(System.currentTimeMillis() + dur.minusMinutes(5).toMillis());
 			String refreshToken = refreshData.getString("refresh_token");
-			return new TokenData(accessToken, dur, refreshToken);
+			Date refreshTokenExpires = new Date(System.currentTimeMillis() + Duration.ofDays(1).toMillis());
+
+			// refresh Token does not expire, we will refresh every day to check if still
+			// connected
+			return new TokenData(accessToken, accessTokenExpires, refreshToken, refreshTokenExpires);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getMessage());
 			e.printStackTrace();
@@ -90,7 +95,7 @@ public class YoutubeOAuth2Platform extends AbstractOAuth2UserPlatform {
 	}
 
 	@Override
-	public String renewClientCredentials(String clientCredentials) {
+	public TokenData renewClientCredentials(TokenData clientCredentials) {
 		// TODO Auto-generated method stub
 		return null;
 	}

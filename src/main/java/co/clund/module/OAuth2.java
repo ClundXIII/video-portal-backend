@@ -1,7 +1,6 @@
 
 package co.clund.module;
 
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,8 +64,7 @@ public class OAuth2 extends AbstractModule {
 		TokenData clientCredData = abPlat.getClientCredentialsFromCallback(dbCon, parameters);
 
 		UserOAuth2Connection.addNewUserOAuth2Connection(dbCon, session.getThisUser().getId(),
-				abPlat.getdBOAuth2Platform().getId(), new Timestamp(System.currentTimeMillis()), clientCredData.token,
-				"", clientCredData.refreshToken);
+				abPlat.getdBOAuth2Platform().getId(), "", clientCredData);
 
 		return "/" + LOCATION;
 	};
@@ -140,7 +138,7 @@ public class OAuth2 extends AbstractModule {
 
 		if (data == null) {
 			logger.log(Level.WARNING, "data is null @OAuth2.callback");
-			return new FunctionResult(Status.OK, LOCATION);
+			return new FunctionResult("".getBytes());//Status.OK, LOCATION);
 		}
 
 		String retVal = dbCon.getListener().getCallBackHandler().call(data.callbackFunc, data.platformKey, s,
