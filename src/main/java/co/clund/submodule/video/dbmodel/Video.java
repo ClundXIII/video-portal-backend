@@ -19,7 +19,7 @@ import co.clund.util.log.LoggingUtil;
 
 public class Video extends AbstractDbTable {
 
-	public static final SimpleDateFormat UPLOAD_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd-kk:mm:ss");
+	public static final SimpleDateFormat UPLOAD_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
 
 	public static final String DB_TABLE_NAME = "video";
 	public static final String DB_TABLE_COLUMN_NAME_OWNER_ID = "owner_id";
